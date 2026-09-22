@@ -3,6 +3,7 @@ target_sources(util PRIVATE
   phys_const.F90
   typedef.f90
   grid.f90
+  initial_conditions.f90
 )
 
 set_target_properties(util PROPERTIES
