@@ -8,8 +8,8 @@ module phys_const
 
     !Unit conversion
     real(wp), parameter :: u_to_me = 1._wp/5.486e-4_wp
-    real(wp), parameter :: Hz_to_atm = 4.1356e-12_wp/27211.6_wp
-    real(wp), parameter, public :: conv_m_to_a0= 5.29177210544e-11_wp
+    real(wp), parameter :: conv_Hz_to_atm = 4.1356e-12_wp/27211.6_wp
+    real(wp), parameter, public :: conv_m_to_a0= 1._wp/5.29177210544e-11_wp
 
     !parameter declaration
     real(wp), parameter :: add = 130 !In a_0 units
@@ -19,7 +19,7 @@ module phys_const
     real(wp), parameter, public :: const_pi = 3.141592653589793_wp
 
 #ifndef NO_OSCILLATOR
-    real(wp), parameter, public  :: const_w(3) = ([60, 60, 120])*Hz_to_atm
+    real(wp), parameter, public  :: const_w(3) = 2._wp*const_pi*([60, 60, 120])*conv_Hz_to_atm
     !!external potential trap parameter
 #else
     real(wp), parameter, public  :: const_w(3) = 0._wp
