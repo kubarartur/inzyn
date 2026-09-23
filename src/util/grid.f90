@@ -12,6 +12,9 @@ module grid_util
         !!tabelarized wavefunction psi(x,y,z)
         real(wp), allocatable :: V_ext(:, :, :)
         !!tablearized external trap potential V_ext(x,y,z)
+        real(wp), allocatable :: dist(:, :, :)
+        !!table of distances based on the relative offset
+        !!to persevere logic lower bound is 0
         real(wp) :: dr(3)
         !!size of the grid cell in each dimension
         real(wp) :: blc(3)
@@ -65,8 +68,13 @@ contains
 
         allocate (ws%psi(N(1), N(2), N(3)))
         allocate (ws%V_ext(N(1), N(2), N(3)))
+        allocate (ws%dist(0:N(1) - 1, &
+                          0:N(2) - 1, &
+                          0:N(3) - 1))
 
         ws%dr = dr
+
+        !initialize the wavefunction and external potential
         do i = 1, N(3)
             r(3) = ws%blc(3) + i*ws%dr(3)
             do j = 1, N(2)
@@ -78,6 +86,19 @@ contains
                 end do
             end do
         end do
+
+        !tabelarize the distances
+        do i = 0, N(3)-1
+            r(3) = i*ws%dr(3)
+            do j = 0, N(2) - 1
+                r(2) = j*ws%dr(2)
+                do k = 0, N(1) - 1
+                    r(1) = k*ws%dr(1)
+                    ws%dist(k,j,i) = norm2(r)
+                end do
+            end do
+        end do
+
     end subroutine init_system
 
     subroutine write_psi_txt(ws, fname)

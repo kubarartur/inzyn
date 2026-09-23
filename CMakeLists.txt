@@ -60,5 +60,12 @@ endif()
 option(NO_CONTACT "disable contact potential" OFF)
 option(NO_DIPOLE  "disable dipole-dipole potential" OFF)
 option(NO_OSCILLATOR "disable external trap potential" OFF)
+option(BUILD_TESTING "build and run tests" ON)
 
 include(cmake/util.cmake)
+
+if(BUILD_TESTING)
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/position_dump")
+    enable_testing()
+    add_subdirectory(tests)
+endif()
