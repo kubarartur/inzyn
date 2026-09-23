@@ -29,10 +29,10 @@ contains
         real(wp), intent(in) :: r(3)
         complex(wp), intent(out) :: phi
 
-        real(wp), parameter :: d = 1.5_wp*m_to_a
-        real(wp), parameter :: sigma(3) = [0.1_wp*d, 0.1_wp*d, 0.3_wp*d]
-        real(wp), parameter :: r01(3) = [-0.5_wp*d, 0._wp, 0._wp]
-        real(wp), parameter :: r02(3) = [0.5_wp*d, 0._wp, 0._wp]
+        real(wp), parameter :: d = 1.5e-6_wp*m_to_a
+        real(wp), parameter :: sigma(3) = [0.5_wp*d, 0.5_wp*d, 0.9_wp*d]
+        real(wp), parameter :: r01(3) = [-d, 0._wp, 0._wp]
+        real(wp), parameter :: r02(3) = [d, 0._wp, 0._wp]
         !positions of the first and the second gaussian
 
         phi = exp(-0.5*sum(((r - r01)/sigma)**2)) + exp(-0.5*sum(((r - r02)/sigma)**2))

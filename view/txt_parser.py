@@ -28,7 +28,7 @@ def read_compl_txt(fname: 'str'):
     return blc, cell_size, values
 
 
-def plot_real(blc, step, vals, linestyle= "-"):
+def plot_real(blc, step, vals, linestyle="-"):
     print(f"shape is {vals.shape}")
     # indices of centers
     xc = vals.shape[0]//2
@@ -64,6 +64,18 @@ def plot_real(blc, step, vals, linestyle= "-"):
     return fig, ax
 
 
+def real_2d(blc, step, values):
+    extent = (blc[0],  # left
+              blc[0] + values.shape[0]*step[0],  # right
+              blc[1],  # bottom
+              blc[1] + values.shape[1]*step[1])
+    print(f" the extent is {extent}")
+
+    fig, ax = plt.subplots()
+    ax.imshow(values.T, extent=extent)
+    return fig, ax
+
+
 if __name__ == "__main__":
     proj_root = Path(__file__).parents[1]
     data_dir = proj_root / "data"
@@ -75,11 +87,7 @@ if __name__ == "__main__":
     plt.show()
 
     blc, step, vals = read_compl_txt(fname2)
-    fig, ax = plot_real(blc, step, vals.real)
-    plt.title("real part of the wavefunction")
+    zc = vals.shape[2]//2
+    data2D = abs(vals[:, :, zc])  # obnoxious incontinuous slice
+    fig, ax = real_2d(blc[0:2], step[0:2], data2D)
     plt.show()
-
-    fig, ax = plot_real(blc, step, vals.imag)
-    plt.title("imag part of the wavefunction")
-    plt.show()
-

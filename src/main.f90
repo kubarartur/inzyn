@@ -6,7 +6,7 @@ program main
     implicit none
 
     type(system) :: gr
-    integer, parameter :: N(3) = [13, 15, 7]
+    integer, parameter :: N(3) = [33, 35, 13]
     real(wp), parameter :: box_size(3) = [6e-6_wp, 6e-6_wp, 6e-6_wp]*m_to_a
     real(wp), parameter :: cell_size(3) = box_size/N
 
