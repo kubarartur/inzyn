@@ -33,6 +33,9 @@ module phys_const
 
     real(wp), parameter :: epsilon_dd = 1.5
     real(wp), parameter :: a = add/epsilon_dd
+
+    !fractions
+    real(wp), parameter, public :: frac_one_third = 1._wp/3._wp
 contains
 
 end module phys_const

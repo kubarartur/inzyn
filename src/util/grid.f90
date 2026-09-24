@@ -7,9 +7,11 @@ module grid_util
     private
 
     type, public :: system
-        !!system with: grid_step, psi, V_ext
+        !!system with: grid_step, psi, |psi|^2, V_ext
         complex(wp), allocatable :: psi(:, :, :)
         !!tabelarized wavefunction psi(x,y,z)
+        complex(wp), allocatable :: n(:, :, :)
+        !!tabelarized square of the norm of wavefunction
         real(wp), allocatable :: V_ext(:, :, :)
         !!tablearized external trap potential V_ext(x,y,z)
         real(wp), allocatable :: dist(:, :, :)
@@ -67,6 +69,7 @@ contains
         end if
 
         allocate (ws%psi(N(1), N(2), N(3)))
+        allocate (ws%n(N(1), N(2), N(3)))
         allocate (ws%V_ext(N(1), N(2), N(3)))
         allocate (ws%dist(0:N(1) - 1, &
                           0:N(2) - 1, &
@@ -83,6 +86,7 @@ contains
                     r(1) = ws%blc(1) + k*ws%dr(1)
                     call phi0(r, ws%psi(k, j, i))
                     call V_ext(r, ws%V_ext(k, j, i))
+                    ws%n(k,j,i)= ws%psi(k,j,i)*conjg(ws%psi(k,j,i))
                 end do
             end do
         end do
