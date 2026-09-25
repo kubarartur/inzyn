@@ -1,15 +1,19 @@
 program test_dist
     use :: typedef, only:wp
-    use :: grid_util, only:system
-    use :: phys_const, only:m_to_a => conv_m_to_a0
+    use :: grid_util, only:grid_params
+    use :: system_util, only:system
+    use :: solver, only:H_GPe
+    use :: io, only:write_arr
+    use :: phys_const, only:pi => const_pi, m_to_a => conv_m_to_a0
     use :: initial_conditions, only:double_well, double_gaussian
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
-
     implicit none
 
     real(wp), parameter :: tol = 1e-11_wp
 
-    type(system) :: gr
+    type(grid_params) :: gr
+    type(system) :: sys
+    type(H_GPe) :: H
     integer, parameter :: N(3) = [33, 35, 13]
     real(wp), parameter :: box_size(3) = [6e-6_wp, 6e-6_wp, 6e-6_wp]*m_to_a
     real(wp), parameter :: cell_size(3) = box_size/N
@@ -20,7 +24,9 @@ program test_dist
                                                         2, 2, 2, &
                                                         2, 13, 7], [3, 5])
 
-    call gr%init(N, cell_size, double_gaussian, double_well)
+    call gr%init(N, cell_size)
+    call sys%init(gr, double_gaussian)
+    call H%init(gr, sys, double_well)
 
     block
         integer :: i, j

@@ -1,62 +1,76 @@
 module solver
     use :: typedef, only:wp
-    use :: grid_util, only:system
+    use :: grid_util, only:grid_params
+    use :: system_util, only:system
     use :: phys_const, only: &
         cdd => const_cdd, &
         pi => const_pi, &
-        one_third => frac_one_third
+        one_third => frac_one_third , &
+        gLHY => const_gamma_LHY, &
+        gcont => const_g_cont
+
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
     implicit none
     private
 
-    type, private :: H_GPe
+    type, public :: H_GPe
         !!Hamiltionian in the extended Gross-Pitaievskii equation
         real(wp), allocatable :: vdd(:, :, :)
+        !!term from dipole dipole interaciton
+        real(wp), allocatable :: n(:, :, :)
+        !!tabelarized square of the norm of wavefunction
+        real(wp), allocatable :: V_ext(:, :, :)
+        !!tablearized external trap potential V_ext(x,y,z)
 
     contains
         procedure, public :: init => init_HGPe
         procedure, public :: apply => apply_HGPe
     end type
 
+    abstract interface
+        pure subroutine V_ext0(r, val)
+            use :: typedef
+            real(wp), intent(in) :: r(3)
+            real(wp), intent(out) :: val
+        end subroutine V_ext0
+    end interface
 contains
 
     !TODO: ensure that the density is in pair with the wavefunction
     !the density refresh is not yet implemented
 
-    subroutine V_dd(sys, vdd)
+    subroutine V_dd(H, gr)
         !!compute the dipole diple term of the
         !!extended Gross-Pitajevskii Hamiltonian
-        type(system), intent(in) :: sys
-        !!instance of system derrived type
-        real(wp), intent(out) :: vdd(:, :, :)
-        !!evaluated quantity
+        type(H_GPe), intent(inout) :: H
+        type(grid_params), intent(in) :: gr
 
         real(wp), allocatable :: n_copy(:, :, :)
         integer :: i, j, k
 
         !obnoxious copy, with allocation on assignment
-        n_copy = sys%n
+        n_copy = H%n
 
         !modification in place
-        call overrelax_lapl3D(n_copy, sys%dr)
+        call overrelax_lapl3D(n_copy, gr%dr)
 
         do k = 2, size(n_copy, 3) - 1
         do j = 1, size(n_copy, 2)
         do i = 1, size(n_copy, 1)
             !central difference for the second derrivative
             !along the dipole axis (z)
-            vdd(i, j, k) = (n_copy(i, j, k + 1) - 2*n_copy(i, j, k) + n_copy(i, j, k - 1))/sys%dr(3)**2
+            H%vdd(i, j, k) = (n_copy(i, j, k + 1) - 2*n_copy(i, j, k) + n_copy(i, j, k - 1))/gr%dr(3)**2
         end do
         end do
         end do
 
         !add the term with Kroneker's delta
         !important: here no longer is sys%n equal to n_copy
-        vdd = vdd + one_third*sys%n
+        H%vdd = H%vdd + one_third*H%n
 
         !correct scaling constant
-        vdd = -cdd*vdd
+        H%vdd = -cdd*H%vdd
     end subroutine V_dd
 
     subroutine overrelax_Lapl3D(arr, dr)
@@ -154,15 +168,48 @@ contains
         diff = (arr(3) - 2*arr(2) + arr(1))/dr**2
     end subroutine d2_central
 
-    subroutine init_HGPe(H, sys)
+    subroutine init_HGPe(H, gr, sys, V_ext)
         class(H_GPe), intent(out) :: H
-        type(system), intent(inout) :: sys
+        type(grid_params), intent(in) :: gr
+        type(system), intent(in) :: sys
+        procedure(V_ext0) :: V_ext
 
+        integer :: i,j,k
+        real(wp) :: r(3)
+
+        allocate (H%vdd(gr%dims(1), gr%dims(2), gr%dims(3)))
+        allocate (H%V_ext(gr%dims(1), gr%dims(2), gr%dims(3)))
+        allocate (H%n(gr%dims(1), gr%dims(2), gr%dims(3)))
+
+        !initialize the external potential
+        do i = 1, gr%dims(3)
+            r(3) = gr%blc(3) + i*gr%dr(3)
+            do j = 1, gr%dims(2)
+                r(2) = gr%blc(2) + j*gr%dr(2)
+                do k = 1, gr%dims(1)
+                    r(1) = gr%blc(1) + k*gr%dr(1)
+                    call V_ext(r, H%V_ext(k, j, i))
+                end do
+            end do
+        end do
+
+        !initialize the density
+        H%n = sys%psi*conjg(sys%psi)
     end subroutine init_HGPe
 
-    subroutine apply_HGPe(H, sys)
+    subroutine apply_HGPe(H, grid, sys)
         class(H_GPe), intent(inout) :: H
+        type(grid_params), intent(in) :: grid
         type(system), intent(inout) :: sys
+
+        integer :: i, j, k
+
+        !Refresh the stored density
+        !additional saety check. Fail if the dimension were to not agree
+        !instead of silent reallocation on assgnment
+        H%n(:,:,:) = sys%psi*conjg(sys%psi)
+
+        !TODO: find away to possibly avoid obnoxious copy
 
     end subroutine apply_HGPe
 end module solver

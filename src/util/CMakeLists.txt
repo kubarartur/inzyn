@@ -1,9 +1,11 @@
 add_library(util)
 target_sources(util PRIVATE
-  phys_const.F90
   typedef.f90
+  phys_const.F90
   grid.f90
+  system.f90
   initial_conditions.f90
+  io.f90
 )
 
 set_target_properties(util PROPERTIES

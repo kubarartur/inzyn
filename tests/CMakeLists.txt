@@ -7,6 +7,7 @@ foreach(target_source ${reg_targets_sources})
     target_link_libraries( ${bfname}
         PRIVATE
             util
+            solver
     )
 endforeach()
 
