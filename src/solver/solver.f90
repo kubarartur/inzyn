@@ -5,7 +5,7 @@ module solver
     use :: phys_const, only: &
         cdd => const_cdd, &
         pi => const_pi, &
-        one_third => frac_one_third , &
+        one_third => frac_one_third, &
         gLHY => const_gamma_LHY, &
         gcont => const_g_cont
 
@@ -174,7 +174,7 @@ contains
         type(system), intent(in) :: sys
         procedure(V_ext0) :: V_ext
 
-        integer :: i,j,k
+        integer :: i, j, k
         real(wp) :: r(3)
 
         allocate (H%vdd(gr%dims(1), gr%dims(2), gr%dims(3)))
@@ -197,19 +197,91 @@ contains
         H%n = sys%psi*conjg(sys%psi)
     end subroutine init_HGPe
 
-    subroutine apply_HGPe(H, grid, sys)
+    subroutine apply_HGPe(H, gr, sys)
         class(H_GPe), intent(inout) :: H
-        type(grid_params), intent(in) :: grid
+        type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
 
         integer :: i, j, k
+        complex(wp), allocatable :: psi_copy(:, :, :)
 
         !Refresh the stored density
         !additional saety check. Fail if the dimension were to not agree
         !instead of silent reallocation on assgnment
-        H%n(:,:,:) = sys%psi*conjg(sys%psi)
+        H%n(:, :, :) = sys%psi*conjg(sys%psi)
 
-        !TODO: find away to possibly avoid obnoxious copy
+        !the padding is needed for the laplaceian calculation
+        allocate (psi_copy(size(sys%psi, 1) + 1, &
+                           size(sys%psi, 2) + 1, &
+                           size(sys%psi, 3) + 1))
+
+
+    contains
+        pure subroutine lpalaceian()
+            integer :: ii, jj, kk
+            integer :: iend
+
+            !fill the padding
+            !x
+            iend = size(psi, 1)
+            do kk = 1, size(psi, 3)
+            do jj = 1, size(psi, 2)
+                psi_copy(0, jj, kk) = 4._wp*psi_copy(1, jj, kk) - 6._wp*psi_copy(2, jj, kk) &
+                                      + 4._wp*psi_copy(3, jj, kk) - psi_copy(4, jj, kk)
+
+                psi_copy(iend + 1, jj, kk) = 4._wp*psi_copy(iend, jj, kk) - 6._wp*psi_copy(iend - 1, jj, kk) &
+                                             + 4._wp*psi_copy(iend - 2, jj, kk) - psi_copy(iend - 3, jj, kk)
+            end do
+            end do
+
+            !y
+            iend = size(psi, 2)
+            do kk = 1, size(psi, 3)
+            do ii = 1, size(psi, 1)
+                psi_copy(ii, 0, kk) = 4._wp*psi_copy(ii, 1, kk) - 6._wp*psi_copy(ii, 2, kk) &
+                                      + 4._wp*psi_copy(ii, 3, kk) - psi_copy(ii, 4, kk)
+
+                psi_copy(ii , iend + 1, kk) = 4._wp*psi_copy(ii, iend, kk) - 6._wp*psi_copy(ii, iend - 1, kk) &
+                                             + 4._wp*psi_copy(ii, iend - 2, kk) - psi_copy(ii, iend - 3, kk)
+            end do
+            end do
+
+            !z
+            iend = size(psi, 3)
+            do jj = 1, size(psi, 2)
+            do ii = 1, size(psi, 1)
+                psi_copy(ii, jj, 0) = 4._wp*psi_copy(ii, jj, 1) - 6._wp*psi_copy(ii, jj, 2) &
+                                      + 4._wp*psi_copy(ii, jj, 3) - psi_copy(ii, jj, 4)
+
+                psi_copy(ii , jj, iend + 1) = 4._wp*psi_copy(ii, jj, iend) - 6._wp*psi_copy(ii, jj, iend - 1) &
+                                             + 4._wp*psi_copy(ii, jj, iend - 2) - psi_copy(ii, jj, iend - 3)
+            end do
+            end do
+
+            iend = size(psi, 1)
+            do kk = 1, size(psi, 3)
+            do jj = 1, size(psi, 2)
+                psi_copy(0, jj, kk) = 4._wp*psi_copy(1, jj, kk) - 6._wp*psi_copy(2, jj, kk) &
+                                      + 4._wp*psi_copy(3, jj, kk) - psi_copy(4, jj, kk)
+
+                psi_copy(iend + 1, jj, kk) = 4._wp*psi_copy(iend, jj, kk) - 6._wp*psi_copy(iend - 1, jj, kk) &
+                                             + 4._wp*psi_copy(iend - 2, jj, kk) - psi_copy(iend - 3, jj, kk)
+            end do
+            end do
+
+            !compute the laplaceian
+            do kk = 1, size(psi, 3)
+            do jj = 1, size(psi, 2)
+            do ii = 1, size(psi, 1)
+                psi_copy(ii, jj, kk) = &
+                    (psi(ii + 1, jj, kk) - 2._wp*psi(ii, jj, kk) + psi(ii - 1, jj, kk))/gr%dr(1)**2 + &
+                    (psi(ii, jj + 1, kk) - 2._wp*psi(ii, jj, kk) + psi(ii, jj - 1, kk))/gr%dr(2)**2 + &
+                    (psi(ii, jj, kk + 1) - 2._wp*psi(ii, jj, kk) + psi(ii, jj, kk - 1))/gr%dr(3)**2
+            end do
+            end do
+            end do
+        end subroutine laplaceian
 
     end subroutine apply_HGPe
+
 end module solver

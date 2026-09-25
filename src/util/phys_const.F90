@@ -36,7 +36,7 @@ module phys_const
 
     !in choosen system of coordinates (atomic) the \hbar is equal 1
     !which is why \hbar is missing from the assignment bellow
-    real(wp), parameter, public :: const_g_cont = 4._wp*cost_pi*a/m
+    real(wp), parameter, public :: const_g_cont = 4._wp*const_pi*a/const_m
 
     real(wp), parameter, public :: const_gamma_LHY = 128._wp*sqrt(const_pi*a**5)/3._wp/const_m*(1 + 1.5_wp*epsilon_dd**2)
 
