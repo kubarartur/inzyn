@@ -6,7 +6,7 @@ import sys
 
 def write_head(file, indices):
     file.write("""
-submodule(solver) autogen_lagrangeian
+submodule(hamiltonian) autogen_lagrangeian
     implicit none
 contains
 

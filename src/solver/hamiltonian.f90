@@ -54,6 +54,30 @@ contains
     !TODO: ensure that the density is in pair with the wavefunction
     !the density refresh is not yet implemented
 
+    subroutine apply_HGPe(H, gr, sys)
+        class(H_GPe), intent(inout) :: H
+        type(grid_params), intent(in) :: gr
+        type(system), intent(inout) :: sys
+
+        integer :: i, j, k
+        complex(wp), allocatable :: psi_copy(:, :, :)
+
+        !Refresh the stored density
+        !additional saety check. Fail if the dimension were to not agree
+        !instead of silent reallocation on assgnment
+        H%n(:, :, :) = sys%psi*conjg(sys%psi)
+
+        !TODO: consider doing something smarter
+        !this is expensive maybe though not a bottleneck
+        !allocation on assignment
+        psi_copy = sys%psi
+
+        call laplaceian(gr, psi_copy, sys%psi)
+        sys%psi = -0.5_wp/m*sys%psi
+        sys%psi = sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
+    end subroutine apply_HGPe
+
+
     subroutine V_dd(H, gr)
         !!compute the dipole diple term of the
         !!extended Gross-Pitajevskii Hamiltonian
@@ -67,7 +91,7 @@ contains
         n_copy = H%n
 
         !modification in place
-        call overrelax_lapl3D(n_copy, gr%dr)
+        call overrelax_lapl3D(n_copy, H%n, gr%dr)
 
         do k = 2, size(n_copy, 3) - 1
         do j = 1, size(n_copy, 2)
@@ -87,15 +111,18 @@ contains
         H%vdd = -cdd*H%vdd
     end subroutine V_dd
 
-    subroutine overrelax_Lapl3D(arr, dr)
+    subroutine overrelax_Lapl3D(arr, rhs, dr)
         !! Perform overrelaxation procedure on for 3D Laplace equation
         real(wp), intent(inout) :: arr(:, :, :)
         !! Grid to be changed in place
+        real(wp), intent(in) :: rhs(:, :, :)
+        !! The right hand side of the laplace's equation to be solved
         real(wp), intent(in) :: dr(3)
         !! Cell sizes
 
         integer :: iter
-        real(wp) :: vol_inv
+        real(wp) :: denomin_inv
+        real(wp) :: vol
         real(wp) :: initial_S
         real(wp) :: final_S
 
@@ -105,8 +132,6 @@ contains
         !TODO: make this more portable and avoid global state
         real(wp), parameter :: omega = 1.9_wp
 
-        vol_inv = 1._wp/dr(1)/dr(2)/dr(3)
-
         !set zero boundary conditions
         arr(1, :, :) = 0
         arr(size(arr, 1), :, :) = 0
@@ -115,7 +140,11 @@ contains
         arr(:, :, 1) = 0
         arr(:, :, size(arr, 3)) = 0
 
+        denomin_inv = dr(1)*dr(2) + dr(1)*dr(3) + dr(2)*dr(3)
+        vol = dr(1)*dr(2)*dr(3)
+
         !initial action functional value
+        !TODO: Verify that calc action indeed works correctly
         call calc_action(arr, initial_S)
 
         !do the relaxation steps
@@ -138,10 +167,11 @@ contains
             do k = 2, size(a, j) - 1
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 3) - 1
-                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*0.5_wp*vol_inv*( &
+                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*0.5_wp*denomin_inv*( &
                              dr(2)*dr(3)*(a(i - 1, j, k) + a(i + 1, j, k)) + &
                              dr(1)*dr(3)*(a(i, j - 1, k) + a(i, j + 1, k)) + &
-                             dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k + 1)))
+                             dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k + 1)) - &
+                             rhs(i, j, k)*vol)
             end do
             end do
             end do
@@ -149,18 +179,20 @@ contains
 
         pure subroutine calc_action(a, action)
             real(wp), intent(in) :: a(:, :, :)
+            !!current approximation
             real(wp), intent(out) :: action
+            !!action functional value
             integer :: i, j, k
 
             action = 0
             do k = 2, size(a, j) - 1
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 3) - 1
-                action = action + abs(0.5_wp*vol_inv*( &
+                action = action + abs(0.5_wp*denomin_inv*( &
                                       dr(2)*dr(3)*(a(i - 1, j, k) + a(i + 1, j, k)) + &
                                       dr(1)*dr(3)*(a(i, j - 1, k) + a(i, j - 1, k)) + &
-                                      dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k - 1))) - &
-                                      a(i, j, k))
+                                      dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k - 1)) - &
+                                      rhs(i, j, k)*vol) - a(i, j, k))
             end do
             end do
             end do
@@ -195,28 +227,5 @@ contains
         !initialize the density
         H%n = sys%psi*conjg(sys%psi)
     end subroutine init_HGPe
-
-   subroutine apply_HGPe(H, gr, sys)
-        class(H_GPe), intent(inout) :: H
-        type(grid_params), intent(in) :: gr
-        type(system), intent(inout) :: sys
-
-        integer :: i, j, k
-        complex(wp), allocatable :: psi_copy(:, :, :)
-
-        !Refresh the stored density
-        !additional saety check. Fail if the dimension were to not agree
-        !instead of silent reallocation on assgnment
-        H%n(:, :, :) = sys%psi*conjg(sys%psi)
-
-        !TODO: consider doing something smarter
-        !this is expensive maybe though not a bottleneck
-        !allocation on assignment
-        psi_copy= sys%psi
-
-        call laplaceian(gr, psi_copy, sys%psi)
-        sys%psi= -0.5_wp/m*sys%psi
-        sys%psi= sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
-    end subroutine apply_HGPe
 
 end module hamiltonian
