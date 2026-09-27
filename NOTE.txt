@@ -1,1 +1,1 @@
-implement Laplacieian caluclation and then rest of apply H
+in playground pyt you have a nice autogen laplaceian that needs some work. Be sure to look into that

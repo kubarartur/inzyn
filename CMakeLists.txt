@@ -65,7 +65,6 @@ option(BUILD_TESTING "build and run tests" ON)
 include(cmake/util.cmake)
 
 if(BUILD_TESTING)
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/position_dump")
     enable_testing()
     add_subdirectory(tests)
 endif()

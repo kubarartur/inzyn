@@ -1,6 +1,16 @@
 add_library(solver)
 target_sources(solver PRIVATE
   solver.f90
+  hamiltonian.f90
+  autogen_laplaceian.f90
+)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+add_custom_command(
+  OUTPUT autogen_laplaceian.f90
+  COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/laplgen.py" autogen_laplaceian.f90
+  COMMENT "Generating submodule with Laplaceian Calculation"
+  VERBATIM
 )
 
 target_link_libraries(solver PUBLIC
@@ -8,9 +18,9 @@ target_link_libraries(solver PUBLIC
 )
 
 set_target_properties(solver PROPERTIES
-    Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod_files
+  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod_files
 )
 
 target_include_directories(solver INTERFACE
-    ${CMAKE_CURRENT_BINARY_DIR}/mod_files
+  ${CMAKE_CURRENT_BINARY_DIR}/mod_files
 )
