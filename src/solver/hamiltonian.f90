@@ -72,11 +72,12 @@ contains
         !allocation on assignment
         psi_copy = sys%psi
 
+        call V_dd(H, gr)
+
         call laplaceian(gr, psi_copy, sys%psi)
         sys%psi = -0.5_wp/m*sys%psi
         sys%psi = sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
     end subroutine apply_HGPe
-
 
     subroutine V_dd(H, gr)
         !!compute the dipole diple term of the
@@ -112,7 +113,7 @@ contains
     end subroutine V_dd
 
     subroutine overrelax_Lapl3D(arr, rhs, dr)
-        !! Perform overrelaxation procedure on for 3D Laplace equation
+        !! Perform overrelaxation procedure for 3D Laplace equation
         real(wp), intent(inout) :: arr(:, :, :)
         !! Grid to be changed in place
         real(wp), intent(in) :: rhs(:, :, :)
@@ -122,7 +123,7 @@ contains
 
         integer :: iter
         real(wp) :: denomin_inv
-        real(wp) :: vol
+        real(wp) :: vol2
         real(wp) :: initial_S
         real(wp) :: final_S
 
@@ -140,8 +141,8 @@ contains
         arr(:, :, 1) = 0
         arr(:, :, size(arr, 3)) = 0
 
-        denomin_inv = dr(1)*dr(2) + dr(1)*dr(3) + dr(2)*dr(3)
-        vol = dr(1)*dr(2)*dr(3)
+        denomin_inv = dr(1)**2*dr(2)**2 + dr(1)**2*dr(3)**2 + dr(2)**2*dr(3)**2
+        vol2 = dr(1)**2*dr(2)**2*dr(3)**2
 
         !initial action functional value
         !TODO: Verify that calc action indeed works correctly
@@ -164,14 +165,14 @@ contains
             real(wp), intent(inout) :: a(:, :, :)
             integer :: i, j, k
 
-            do k = 2, size(a, j) - 1
+            do k = 2, size(a, 1) - 1
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 3) - 1
-                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*0.5_wp*denomin_inv*( &
-                             dr(2)*dr(3)*(a(i - 1, j, k) + a(i + 1, j, k)) + &
-                             dr(1)*dr(3)*(a(i, j - 1, k) + a(i, j + 1, k)) + &
-                             dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k + 1)) - &
-                             rhs(i, j, k)*vol)
+                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*denomin_inv*( &
+                             dr(2)**2*dr(3)**2*(a(i - 1, j, k) + a(i + 1, j, k)) + &
+                             dr(1)**2*dr(3)**2*(a(i, j - 1, k) + a(i, j + 1, k)) + &
+                             dr(1)**2*dr(2)**2*(a(i, j, k - 1) + a(i, j, k + 1)) - &
+                             rhs(i, j, k)*vol2)
             end do
             end do
             end do
@@ -185,14 +186,14 @@ contains
             integer :: i, j, k
 
             action = 0
-            do k = 2, size(a, j) - 1
+            do k = 2, size(a, 1) - 1
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 3) - 1
-                action = action + abs(0.5_wp*denomin_inv*( &
-                                      dr(2)*dr(3)*(a(i - 1, j, k) + a(i + 1, j, k)) + &
-                                      dr(1)*dr(3)*(a(i, j - 1, k) + a(i, j - 1, k)) + &
-                                      dr(1)*dr(2)*(a(i, j, k - 1) + a(i, j, k - 1)) - &
-                                      rhs(i, j, k)*vol) - a(i, j, k))
+                action = action + abs(denomin_inv*( &
+                                      dr(2)**2*dr(3)**2*(a(i - 1, j, k) + a(i + 1, j, k)) + &
+                                      dr(1)**2*dr(3)**2*(a(i, j - 1, k) + a(i, j - 1, k)) + &
+                                      dr(1)**2*dr(2)**2*(a(i, j, k - 1) + a(i, j, k - 1)) - &
+                                      rhs(i, j, k)*vol2) - a(i, j, k))
             end do
             end do
             end do
