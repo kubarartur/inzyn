@@ -1,0 +1,10 @@
+&solver_params
+   N = 50, 50, 50,
+   Nstep = 100,
+   box_size = 1e-5, 1e-5, 1e-5,
+   dtau = 1e-6
+/
+   
+
+
+

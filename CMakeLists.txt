@@ -6,60 +6,36 @@ project(quantumDecaf
 
 add_subdirectory(src)
 
-if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    set(
-        CMAKE_Fortran_FLAGS_INIT
-        "-fimplicit-none"
-        "-ffree-line-length-132"
-    )
-    set(
-        CMAKE_Fortran_FLAGS_RELEASE_INIT
-    )
+# Disable Position Independent Code globally (creates statically linked code)
+set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
+# Enable Link Time Optimization (LTO / IPO) for Release builds only.
+# CMake natively abstracts the compiler flag (e.g., -flto for GNU, -ipo for Intel).
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
-    block()
-        #contents of wall, without Wunused and Winteger-division
-        #TODO: consider chaining to -Wall -Wno-unused Wno-integer-division
-        set(wall_ish "-fsanitize=address;-Waliasing;-Wampersand;-Wconversion;-Wsurprising;-Wc-binding-type;-Wintrinsics-std;-Wtabs;-Wintrinsic-shadow;-Wline-truncation;-Wtarget-lifetime;-Wreal-q-constant;-Wundefined-do-loop;-Wmaybe-uninitialized")
-        set(loc_deb_flags "-O0;-g;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow;-finit-real=snan;-Werror;-pedantic;-fimplicit-none;-std=f2018")
-        list(APPEND loc_deb_flags ${wall_ish})
-        set(locl_deb_flags "-fsanitize=address;-O0;-g;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow;-finit-real=snan")
-        set(loclr_el_flags "-O3;-march=native;-flto;-funroll-loops")
-
-        set(loc_rel_flags "-O3;-march=native;-flto;-funroll-loops;-Wall;-Wextra;-pedantic;-fimplicit-none;-std=f2018")
-        foreach(flag ${loc_deb_flags})
-            add_compile_options(
-                $<$<CONFIG:Debug>:${flag}>
-            )
-        endforeach()
-
-        foreach(flag ${locl_deb_flags})
-            add_link_options(
-                $<$<CONFIG:Debug>:${flag}>
-            )
-        endforeach()
-
-        foreach(flag ${loc_rel_flags})
-            add_compile_options(
-                $<$<CONFIG:Release>:${flag}>
-            )
-        endforeach()
-
-        foreach(flag ${locl_rel_flags})
-            add_link_options(
-                $<$<CONFIG:Release>:${flag}>
-            )
-        endforeach()
-    endblock()
-
+# Optional but recommended: Check if the current compiler actually supports IPO
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT error)
+if(ipo_supported)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 else()
-    message(WARNING "can't setup proper compilation flags for used compiler.
-                     defaulting to basic flags")
+    message(WARNING "IPO/LTO is not supported by this compiler: ${error}")
 endif()
 
-option(NO_CONTACT "disable contact potential" OFF)
-option(NO_DIPOLE  "disable dipole-dipole potential" OFF)
-option(NO_OSCILLATOR "disable external trap potential" OFF)
+# ---------------------------------------------------------------------------
+# 2. Compiler-Specific Flags via Generator Expressions
+# ---------------------------------------------------------------------------
+
+add_compile_options(
+    # --- GNU (gfortran) Flags ---
+    "$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-O0;-g;-Wall;-Wextra;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow>"
+    "$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Release>>:-O3>"
+
+    # --- Intel (ifort / ifx) Flags ---
+    "$<$<AND:$<IN_LIST:$<Fortran_COMPILER_ID>,Intel;IntelLLVM>,$<CONFIG:Debug>>:-O0;-g;-warn;all;-check;all;-traceback;-fpe0>"
+    "$<$<AND:$<IN_LIST:$<Fortran_COMPILER_ID>,Intel;IntelLLVM>,$<CONFIG:Release>>:-O3>"
+)
+
 option(BUILD_TESTING "build and run tests" ON)
 
 include(cmake/util.cmake)

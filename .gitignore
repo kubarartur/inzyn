@@ -2,3 +2,6 @@ playground/
 build/
 Makefile
 data
+view/.venv
+uv.lock
+__pycache__

@@ -14,19 +14,56 @@ program main
     type(H_GPe) :: H
     type(solver) :: sol
 
-    integer, parameter :: N(3) = [33, 35, 13]
-    real(wp), parameter :: box_size(3) = [6e-6_wp, 6e-6_wp, 6e-6_wp]*m_to_a
-    real(wp), parameter :: cell_size(3) = box_size/N
+    integer :: N(3) = [50, 50, 40]
+    !!the size of the simulation grid
+    integer :: Nstep = 1000
+    !!number of steps of the solver in Wick's rotation part
+    real(wp) :: box_size(3) = [6e-6_wp, 6e-6_wp, 6e-6_wp]
+    !!size of the simulation box. Here in meters for consistency with namelist.
+    !!unit conversion later on
+    real(wp) :: dtau = 1e-5_wp
+    !!timestep in the Wick's rotation
+
+    real(wp) :: cell_size(3)
+    integer :: i
+    integer :: io
+    character(len=:), allocatable :: out_dir_name
+    integer :: argc
+    namelist /solver_params/ N, Nstep, box_size, dtau
+
+    !read the sovler params from file
+    io = 67
+    open(io, file="input.nml", status="old", action="read")
+    read(io, nml=solver_params)
+    close(io)
+
+    argc= command_argument_count()
+    if(argc < 1 .or. argc > 1) then
+        write(*,*) "Usage: main <output_dir>"
+        stop 1
+    end if
+    block
+        character(len=255) :: temp
+        call get_command_argument(1, temp)
+        out_dir_name= trim(temp)
+    end block
+
+    box_size= box_size*m_to_a
+    cell_size = box_size/N
 
     call gr%init(N, cell_size)
     call sys%init(gr, double_gaussian)
     call H%init(gr, sys, double_well)
-    call sol%init(1._wp)
+    call sol%init(dtau)
 
-    call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", "data/psi.txt")
-    call write_arr(H%V_ext, gr, "The external trap potential", "data/V_ext.txt")
+    call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", out_dir_name//"psi_init.txt")
+    call write_arr(H%V_ext, gr, "The external trap potential", out_dir_name//"V_ext.txt")
 
+    do i = 1, Nstep
+        call sol%step_imag(gr, sys, H)
+        write (*, *) "Step: ", i, "/", Nstep
+    end do
 
-    write (*, *) "Hello, world!"
+    call write_arr(sys%psi, gr, "Result of the ground state seek", out_dir_name//"psi_final.txt")
 contains
 end program main
