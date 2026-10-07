@@ -18,6 +18,15 @@
       "cacheVariables": {
           "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "Rdeb",
+      "displayName": "default Preset",
+      "description": "some default preset blah",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
     }
   ]
 }

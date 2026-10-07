@@ -21,8 +21,11 @@ if len(numbers) != 0:
 else:
     curr_num = 1
 
+print("Reading: " + str(proj_root/f"data/run_{curr_num}/psi_init.txt"))
 grid_init = prs.readTxt(
     str(proj_root/f"data/run_{curr_num}/psi_init.txt"))
+
+print("Reading: " + str(proj_root/f"data/run_{curr_num}/psi_final.txt"))
 grid_final = prs.readTxt(
     str(proj_root/f"data/run_{curr_num}/psi_final.txt"))
 
@@ -32,6 +35,7 @@ gplt.plotN2(grid_final, ax[1])
 ax[1].set_title("Result of minimal energy seek")
 plt.show()
 
+print("Reading: " + str(proj_root/f"data/run_{curr_num}/E_of_n.txt"))
 E_of_psi, extent = prs.readTxt1D(proj_root/f"data/run_{curr_num}/E_of_n.txt")
 extent = [int(x) for x in extent]
 

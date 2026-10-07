@@ -1,6 +1,6 @@
 &solver_params
    N = 100, 100, 30,
-   Nstep = 1,
+   Nstep = 3,
    box_size = 1e-5, 1e-5, 1e-5,
    dtau = 1e-2
 /

@@ -192,9 +192,9 @@ contains
             mult(3) = dr(1)*dr(2)/dr(3)
 
             action = 0
-            do k = 2, size(a, 1) - 1
+            do k = 2, size(a, 3) - 1
             do j = 2, size(a, 2) - 1
-            do i = 2, size(a, 3) - 1
+            do i = 2, size(a, 1) - 1
                 action = action + 0.125_wp*( &
                          mult(1)*(a(i + 1, j, k) - a(i - 1, j, k))**2 + &
                          mult(2)*(a(i, j + 1, k) - a(i, j - 1, k))**2 + &
