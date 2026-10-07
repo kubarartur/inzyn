@@ -4,7 +4,7 @@ program test_dist
     use :: system_util, only:system
     use :: hamiltonian, only:H_GPe
     use :: io, only:write_arr
-    use :: phys_const, only:pi => const_pi, m_to_a => conv_m_to_a0
+    use :: phys_const, only:m_to_a => conv_m_to_a0
     use :: initial_conditions, only:double_well, double_gaussian
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
     implicit none

@@ -5,7 +5,6 @@ project(quantumDecaf
   LANGUAGES Fortran)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_subdirectory(src)
 
 # Disable Position Independent Code globally (creates statically linked code)
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
@@ -36,6 +35,8 @@ add_compile_options(
 "$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,Intel,IntelLLVM>,$<CONFIG:Debug>>:-O0;-g;-warn;all;-check;all;-traceback;-fpe0>"
 "$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,Intel,IntelLLVM>,$<CONFIG:Release>>:-O3>"
 )
+
+add_subdirectory(src)
 
 option(BUILD_TESTING "build and run tests" ON)
 

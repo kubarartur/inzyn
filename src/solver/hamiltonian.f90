@@ -59,13 +59,12 @@ contains
         type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
 
-        integer :: i, j, k
         complex(wp), allocatable :: psi_copy(:, :, :)
 
         !Refresh the stored density
         !additional saety check. Fail if the dimension were to not agree
         !instead of silent reallocation on assgnment
-        H%n(:, :, :) = sys%psi*conjg(sys%psi)
+        H%n(:, :, :) = abs(sys%psi)**2
 
         !TODO: consider doing something smarter
         !this is expensive maybe though not a bottleneck
@@ -89,6 +88,7 @@ contains
         integer :: i, j, k
 
         !obnoxious copy, with allocation on assignment
+        allocate (n_copy, source=H%n)
         n_copy = H%n
 
         !modification in place
@@ -122,17 +122,19 @@ contains
         !! Cell sizes
 
         integer :: iter
-        real(wp) :: denomin_inv
-        real(wp) :: vol2
         real(wp) :: initial_S
         real(wp) :: final_S
+
+        !TODO: figure out a smarter name for this variable
+        real(wp) :: multip
 
         !TODO: make this smarter. Possibly some convergence-checking criterion
         integer :: N_step = 1000
 
-        !TODO: make this more portable and avoid global state
+        !TODO: make this more portable
         real(wp), parameter :: omega = 1.9_wp
 
+        multip = 0.5_wp/(1/dr(1)**2 + 1/dr(2)**2 + 1/dr(3)**2)
         !set zero boundary conditions
         arr(1, :, :) = 0
         arr(size(arr, 1), :, :) = 0
@@ -140,9 +142,6 @@ contains
         arr(:, size(arr, 2), :) = 0
         arr(:, :, 1) = 0
         arr(:, :, size(arr, 3)) = 0
-
-        denomin_inv = dr(1)**2*dr(2)**2 + dr(1)**2*dr(3)**2 + dr(2)**2*dr(3)**2
-        vol2 = dr(1)**2*dr(2)**2*dr(3)**2
 
         !initial action functional value
         !TODO: Verify that calc action indeed works correctly
@@ -161,18 +160,18 @@ contains
             stop 1
         end if
     contains
-        pure subroutine step(a)
+        subroutine step(a)
             real(wp), intent(inout) :: a(:, :, :)
             integer :: i, j, k
 
-            do k = 2, size(a, 1) - 1
+            do k = 2, size(a, 3) - 1
             do j = 2, size(a, 2) - 1
-            do i = 2, size(a, 3) - 1
-                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*denomin_inv*( &
-                             dr(2)**2*dr(3)**2*(a(i - 1, j, k) + a(i + 1, j, k)) + &
-                             dr(1)**2*dr(3)**2*(a(i, j - 1, k) + a(i, j + 1, k)) + &
-                             dr(1)**2*dr(2)**2*(a(i, j, k - 1) + a(i, j, k + 1)) - &
-                             rhs(i, j, k)*vol2)
+            do i = 2, size(a, 1) - 1
+                a(i, j, k) = (1 - omega)*a(i, j, k) + omega*multip*( &
+                             (a(i - 1, j, k) + a(i + 1, j, k))/dr(1)**2 + &
+                             (a(i, j - 1, k) + a(i, j + 1, k))/dr(2)**2 + &
+                             (a(i, j, k - 1) + a(i, j, k + 1))/dr(3)**2 - &
+                             rhs(i, j, k))
             end do
             end do
             end do
@@ -185,15 +184,22 @@ contains
             !!action functional value
             integer :: i, j, k
 
+            real(wp) :: mult(3)
+            real(wp) :: vol
+            vol = dr(1)*dr(2)*dr(3)
+            mult(1) = dr(2)*dr(3)/dr(1)
+            mult(2) = dr(1)*dr(3)/dr(2)
+            mult(3) = dr(1)*dr(2)/dr(3)
+
             action = 0
             do k = 2, size(a, 1) - 1
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 3) - 1
-                action = action + abs(denomin_inv*( &
-                                      dr(2)**2*dr(3)**2*(a(i - 1, j, k) + a(i + 1, j, k)) + &
-                                      dr(1)**2*dr(3)**2*(a(i, j - 1, k) + a(i, j - 1, k)) + &
-                                      dr(1)**2*dr(2)**2*(a(i, j, k - 1) + a(i, j, k - 1)) - &
-                                      rhs(i, j, k)*vol2) - a(i, j, k))
+                action = action + 0.125_wp*( &
+                         mult(1)*(a(i + 1, j, k) - a(i - 1, j, k))**2 + &
+                         mult(2)*(a(i, j + 1, k) - a(i, j - 1, k))**2 + &
+                         mult(3)*(a(i, j, k + 1) - a(i, j, k - 1))**2 &
+                         ) + rhs(i, j, k)*a(i, j, k)*vol
             end do
             end do
             end do
@@ -226,7 +232,7 @@ contains
         end do
 
         !initialize the density
-        H%n = sys%psi*conjg(sys%psi)
+        H%n = abs(sys%psi)**2
     end subroutine init_HGPe
 
 end module hamiltonian

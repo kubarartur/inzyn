@@ -9,6 +9,7 @@ module system_util
         complex(wp), allocatable :: psi(:, :, :)
     contains
         procedure :: init => init_system
+        procedure :: copy => copy_system
     end type system
 
     abstract interface
@@ -43,4 +44,13 @@ contains
         end do
     end subroutine init_system
 
+    subroutine copy_system(sys, sys2)
+        class(system), intent(out) :: sys
+        type(system), intent(in) :: sys2
+        !TODO: possifbly fragile as one argument is polymorphic and other not
+        ! at the time of writing had no better idea
+
+       allocate(sys%psi, source=sys2%psi)
+        sys%psi(:,:,:) = sys2%psi
+    end subroutine copy_system
 end module

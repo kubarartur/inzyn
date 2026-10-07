@@ -8,4 +8,5 @@ def plotN2(grid: prs.Grid, axes=None):
         fig, axes = plt.subplots()
 
     n = np.real(grid.vals*np.conjugate(grid.vals))
-    axes.imshow(n[:, :, 25].T, extent=grid.getExtent((0, 1)))
+    ih = int(n.shape[2]/2)
+    axes.imshow(n[:, :, ih].T, extent=grid.getExtent((0, 1)))

@@ -73,6 +73,31 @@ def readTxt(fname: 'str') -> tuple[Grid]:
     return grid
 
 
+def readTxt1D(fname: src):
+    extent = np.loadtxt(fname, skiprows=2, max_rows=1, dtype=np.float64)
+    dims = np.loadtxt(fname, skiprows=4, max_rows=1, dtype=np.int32)
+    with open(fname) as f:
+        stri = f.readline()
+        stri = stri.split(":")
+        descr = ""
+        for s in stri[1:]:
+            descr += s
+
+    try:
+        values = np.loadtxt(fname, skiprows=8, dtype=np.float64)
+    except ValueError:
+        def s_to_compl128(s):
+            s = s.strip("()").split(",")
+            return np.complex128(float(s[0]), float(s[1]))
+
+        values = np.loadtxt(fname, skiprows=8,
+                            dtype=np.complex128, converters=s_to_compl128)
+
+    assert (values.shape == dims)
+
+    return values, extent
+
+
 def plot_real(blc, step, vals, linestyle="-"):
     print(f"shape is {vals.shape}")
     # indices of centers

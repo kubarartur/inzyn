@@ -10,6 +10,7 @@ module phys_const
     real(wp), parameter :: u_to_me = 1._wp/5.486e-4_wp
     real(wp), parameter :: conv_Hz_to_atm = 4.1356e-12_wp/27211.6_wp
     real(wp), parameter, public :: conv_m_to_a0 = 1._wp/5.29177210544e-11_wp
+    real(wp), parameter, public :: conv_mev_to_atm = 1._wp/27211.4_wp
 
     !parameter declaration
     real(wp), parameter :: add = 130 !In a_0 units

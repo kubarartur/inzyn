@@ -63,7 +63,7 @@ def write_psi_input(file, indices, indent=0):
 
 def write_loop_head(file, i, iname, indent=0):
     wstr = " "*indent + "do " + iname + \
-        " = 2,size(psi_in, " + str(i + 1) + ")\n"
+        " = 2,size(psi_in, " + str(i + 1) + ") - 1\n"
     file.write(wstr)
 
 

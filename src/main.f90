@@ -5,7 +5,7 @@ program main
     use :: hamiltonian, only:H_GPe
     use :: solver_mod, only:solver
     use :: io, only:write_arr
-    use :: phys_const, only:pi => const_pi, m_to_a => conv_m_to_a0
+    use :: phys_const, only:m_to_a => conv_m_to_a0
     use :: initial_conditions, only:double_well, double_gaussian
     implicit none
 
@@ -25,6 +25,7 @@ program main
     !!timestep in the Wick's rotation
 
     real(wp) :: cell_size(3)
+    complex(wp), allocatable :: energies(:)
     integer :: i
     integer :: io
     character(len=:), allocatable :: out_dir_name
@@ -33,22 +34,22 @@ program main
 
     !read the sovler params from file
     io = 67
-    open(io, file="input.nml", status="old", action="read")
-    read(io, nml=solver_params)
-    close(io)
+    open (io, file="input.nml", status="old", action="read")
+    read (io, nml=solver_params)
+    close (io)
 
-    argc= command_argument_count()
-    if(argc < 1 .or. argc > 1) then
-        write(*,*) "Usage: main <output_dir>"
+    argc = command_argument_count()
+    if (argc < 1 .or. argc > 1) then
+        write (*, *) "Usage: main <output_dir>"
         stop 1
     end if
     block
         character(len=255) :: temp
         call get_command_argument(1, temp)
-        out_dir_name= trim(temp)
+        out_dir_name = trim(temp)
     end block
 
-    box_size= box_size*m_to_a
+    box_size = box_size*m_to_a
     cell_size = box_size/N
 
     call gr%init(N, cell_size)
@@ -59,11 +60,15 @@ program main
     call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", out_dir_name//"psi_init.txt")
     call write_arr(H%V_ext, gr, "The external trap potential", out_dir_name//"V_ext.txt")
 
+    allocate (energies(Nstep))
     do i = 1, Nstep
         call sol%step_imag(gr, sys, H)
+        call sol%find_E(gr, sys, H, energies(i))
         write (*, *) "Step: ", i, "/", Nstep
     end do
 
     call write_arr(sys%psi, gr, "Result of the ground state seek", out_dir_name//"psi_final.txt")
+    call write_arr(energies, [0._wp, 1._wp*Nstep], "Energy as function of imag time step", &
+                   out_dir_name//"E_of_n.txt")
 contains
 end program main

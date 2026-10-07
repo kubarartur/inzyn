@@ -18,6 +18,7 @@ module solver_mod
     contains
         procedure :: init => init_solver
         procedure :: step_imag => imag_step_solver
+        procedure, nopass :: find_E => find_E_solver
     end type solver
 contains
 
@@ -41,6 +42,11 @@ contains
 
         !TODO: need for such call points to possible refactor
         !with the change the application of H is handled
+        allocate (psi_cp( &
+                  size(sys%psi, 1), &
+                  size(sys%psi, 2), &
+                  size(sys%psi, 3) &
+                  ))
         psi_cp = sys%psi
 
         !modify sys%psi in place
@@ -54,7 +60,7 @@ contains
         !normalize the wavefunctoin
         call find_norm(sys%psi, gr%dr, norm_curr)
 
-        !unsafe but if the norm is 0 then we don't have much to work with anyways
+        !norm equal to zero is not a valid state anyways
         sys%psi = sys%psi/norm_curr
     contains
         subroutine find_norm(arr, dr, norm)
@@ -70,12 +76,36 @@ contains
             do kk = 1, size(arr, 3)
             do jj = 1, size(arr, 2)
             do ii = 1, size(arr, 1)
-                norm = norm + dV*arr(ii, jj, kk)*conjg(arr(ii, jj, kk))
+                norm = norm + dV*abs(arr(ii,jj,kk))**2
             end do
             end do
             end do
             norm = sqrt(norm)
         end subroutine find_norm
     end subroutine imag_step_solver
+
+    subroutine find_E_solver(gr, sys, H, res)
+        type(grid_params), intent(in) :: gr
+        type(system), intent(in) :: sys
+        type(H_GPe), intent(inout) :: H
+        complex(wp), intent(out) :: res
+
+        type(system) :: sys_cp
+        integer :: i, j, k
+
+        call sys_cp%copy(sys)
+        !TODO: this refreshes the H%n and forces intent inout
+        !do something about it
+        call H%apply(gr, sys_cp)
+
+        res = (0._wp, 0._wp)
+        do k=1,size(sys%psi, 3)
+        do j=1,size(sys%psi, 2)
+        do i=1,size(sys%psi, 1)
+            res = res + conjg(sys%psi(i,j,k))*sys_cp%psi(i,j,k)
+        end do
+        end do
+        end do
+    end subroutine find_E_solver
 
 end module solver_mod

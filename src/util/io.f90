@@ -8,6 +8,7 @@ module io
     interface write_arr
         module procedure write_arr_real3d
         module procedure write_arr_compl3d
+        module procedure write_arr_compl1d
     end interface
 contains
 
@@ -73,4 +74,34 @@ contains
         close (io)
     end subroutine write_arr_compl3d
 
+    subroutine write_arr_compl1d(arr, extent, descr, fname)
+        complex(wp), intent(in) :: arr(:)
+        real(wp), intent(in) :: extent(2)
+        character(len=*), intent(in) :: descr
+        !!spaces here will break my parser :(
+        character(len=*), intent(in) :: fname
+
+        integer :: io
+        logical :: ex
+        io = 123
+
+        inquire (file=fname, exist=ex)
+        if (ex) then
+            open (newunit=io, file=fname, status="replace", action="write")
+        else
+            open (newunit=io, file=fname, status="new", action="write")
+        end if
+
+        write (io, *) "DESCRIPTION: ", descr
+        write (io, *) "EXTENT: "
+        write (io, *) extent
+        write (io, *) "DIMENSION"
+        write (io, *) shape(arr)
+        write (io, *) "STEP SIZE"
+        write (io, *) (extent(2) - extent(1))/size(arr, 1)
+        write (io, *) "ARRAY VALUES (COMPLEX): "
+        write (io, *) arr
+
+        close (io)
+    end subroutine write_arr_compl1d
 end module io
