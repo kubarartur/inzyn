@@ -37,6 +37,8 @@ module hamiltonian
         end subroutine V_ext0
     end interface
 
+    public :: laplaceian
+
     interface
         module subroutine laplaceian(gr, psi_in, psi_out)
             !!calculate the laplaceian of a complex-valued function psi_in
@@ -127,6 +129,7 @@ contains
 
         !TODO: figure out a smarter name for this variable
         real(wp) :: multip
+        real(wp) :: dr2(3)
 
         !TODO: make this smarter. Possibly some convergence-checking criterion
         integer :: N_step = 1000
@@ -135,6 +138,7 @@ contains
         real(wp), parameter :: omega = 1.9_wp
 
         multip = 0.5_wp/(1/dr(1)**2 + 1/dr(2)**2 + 1/dr(3)**2)
+        dr2 = dr**2
         !set zero boundary conditions
         arr(1, :, :) = 0
         arr(size(arr, 1), :, :) = 0
@@ -168,9 +172,9 @@ contains
             do j = 2, size(a, 2) - 1
             do i = 2, size(a, 1) - 1
                 a(i, j, k) = (1 - omega)*a(i, j, k) + omega*multip*( &
-                             (a(i - 1, j, k) + a(i + 1, j, k))/dr(1)**2 + &
-                             (a(i, j - 1, k) + a(i, j + 1, k))/dr(2)**2 + &
-                             (a(i, j, k - 1) + a(i, j, k + 1))/dr(3)**2 - &
+                             (a(i - 1, j, k) + a(i + 1, j, k))/dr2(1) + &
+                             (a(i, j - 1, k) + a(i, j + 1, k))/dr2(2) + &
+                             (a(i, j, k - 1) + a(i, j, k + 1))/dr2(3) - &
                              rhs(i, j, k))
             end do
             end do
