@@ -13,6 +13,8 @@ module grid_util
         !!position of the bottom left corner of the grid
         real(wp), allocatable :: dist(:, :, :)
         !!table of distances based on the relative offset
+        real(wp), allocatable :: inv_dist(:, :, :)
+        !!inverses of distances for performance
         !!to persevere logic lower bound is 0
         integer :: dims(3)
     contains
@@ -53,6 +55,10 @@ contains
                           0:N(2) - 1, &
                           0:N(3) - 1))
 
+        allocate (gr%inv_dist(1:N(1) - 1, &
+                          1:N(2) - 1, &
+                          1:N(3) - 1))
+
         !tabelarize the distances
         do i = 0, N(3) - 1
             r(3) = i*gr%dr(3)
@@ -64,6 +70,16 @@ contains
                 end do
             end do
         end do
+
+        !find inverses
+        do i = 1, N(3) - 1
+        do j = 1, N(2) - 1
+        do k = 1, N(1) - 1
+            gr%inv_dist(k, j, i) = 1._wp/gr%dist(k, j, i)
+        end do
+        end do
+        end do
+
 
     end subroutine init_grid
 

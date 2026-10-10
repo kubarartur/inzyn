@@ -36,7 +36,7 @@ program test_dist
         real(wp) :: r1(3), r2(3)
 
         do i = 1, size(test_indices, 2)
-        do j = i, size(test_indices, 2)
+        do j = i + 1, size(test_indices, 2)
             r1 = gr%blc + gr%dr*test_indices(:, i)
             r2 = gr%blc + gr%dr*test_indices(:, j)
             dist1 = norm2(r1 - r2)

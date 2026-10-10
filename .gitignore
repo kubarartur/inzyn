@@ -5,3 +5,5 @@ data
 view/.venv
 uv.lock
 __pycache__
+perf.*
+input.nml

@@ -19,6 +19,7 @@ contains
         type(grid_params), intent(in) :: gr
         real(wp), intent(in) :: dens(:,:,:)
 
+        real(wp), parameter :: one4opi = 0.25_wp/pi
         integer :: {endnames[0]}
         integer :: {endnames[1]}
         integer :: {endnames[2]}
@@ -26,6 +27,7 @@ contains
         integer :: {b_indices[0]}, {b_indices[1]}, {b_indices[2]}
         """)
 
+    # TODO: Find a better name for obnoxious one4opi
     file.write("\n")
 
     for i, name in enumerate(endnames):
@@ -103,8 +105,8 @@ def write_loop(file, boundary_indices, indent=0):
             if k < 2:
                 file.write(",")
 
-        file.write(")*0.25_wp/pi/&\n")
-        file.write(" "*indent + "gr%dist(")
+        file.write(")*one4opi*&\n")
+        file.write(" "*indent + "gr%inv_dist(")
 
         # dist indices
         for k in range(3):
