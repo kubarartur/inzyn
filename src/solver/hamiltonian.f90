@@ -37,7 +37,9 @@ module hamiltonian
         end subroutine V_ext0
     end interface
 
+    !TODO: public only for testing purposes. Possible to to change?
     public :: laplaceian
+    public :: vdd_boundary
 
     interface
         module subroutine laplaceian(gr, psi_in, psi_out)
@@ -50,6 +52,18 @@ module hamiltonian
             complex(wp), intent(in) :: psi_in(:, :, :)
             complex(wp), intent(out) :: psi_out(:, :, :)
         end subroutine laplaceian
+
+        module subroutine vdd_boundary(arr, gr, dens)
+            !! calculate the integral of the opsition space probability density
+            !! dens, with the 1/4/pi/|r| kernel
+            !! for the points at the boundary of 3D grid arr
+            real(wp), intent(out) :: arr(:,:,:)
+            !! array which's boundaryu to populate
+            type(grid_params), intent(in) :: gr
+            !! grid in use
+            real(wp), intent(in) :: dens(:,:,:)
+            !! probability density in the position space
+        end subroutine vdd_boundary
     end interface
 contains
 
@@ -69,7 +83,7 @@ contains
         H%n(:, :, :) = abs(sys%psi)**2
 
         !TODO: consider doing something smarter
-        !this is expensive maybe though not a bottleneck
+        !this is expensive guessing not a bottleneck
         !allocation on assignment
         psi_copy = sys%psi
 
@@ -89,10 +103,12 @@ contains
         real(wp), allocatable :: n_copy(:, :, :)
         integer :: i, j, k
 
-        !obnoxious copy, with allocation on assignment
+        !TODO: Does it have to be like that?
         allocate (n_copy, source=H%n)
         n_copy = H%n
 
+        !find the boundary condition for the laplace's equation
+        call vdd_boundary(n_copy, gr, H%n)
         !modification in place
         call overrelax_lapl3D(n_copy, H%n, gr%dr)
 
@@ -116,6 +132,9 @@ contains
 
     subroutine overrelax_Lapl3D(arr, rhs, dr)
         !! Perform overrelaxation procedure for 3D Laplace equation
+        !! This does not touch the boundary
+        !! Whatever is at the boundary of the box is taken as a
+        !! boundary condition
         real(wp), intent(inout) :: arr(:, :, :)
         !! Grid to be changed in place
         real(wp), intent(in) :: rhs(:, :, :)
@@ -139,13 +158,6 @@ contains
 
         multip = 0.5_wp/(1/dr(1)**2 + 1/dr(2)**2 + 1/dr(3)**2)
         dr2 = dr**2
-        !set zero boundary conditions
-        arr(1, :, :) = 0
-        arr(size(arr, 1), :, :) = 0
-        arr(:, 1, :) = 0
-        arr(:, size(arr, 2), :) = 0
-        arr(:, :, 1) = 0
-        arr(:, :, size(arr, 3)) = 0
 
         !initial action functional value
         !TODO: Verify that calc action indeed works correctly
