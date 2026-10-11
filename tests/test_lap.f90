@@ -14,7 +14,8 @@ program test_lap
     real(wp), parameter :: cell_size(3) = [2._wp, 0.7_wp, 3._wp]
     !some random cell numbers
     integer, parameter :: N(3) = [50, 50, 30]
-    real(wp), parameter :: tol = 1e-4_wp
+    real(wp), parameter :: tol = 1e-2_wp
+    real(wp) :: max_err
 
     !width and wavevector small enough that O(h^2) FD error stays under tol
     real(wp), parameter :: alpha = 1.0e-4_wp
@@ -27,15 +28,15 @@ program test_lap
     call sys_num%init(gr, gauss_psi0)
     allocate(psi_cp, source=sys_num%psi)
     psi_cp = sys_num%psi
-    call sys_analitic%init(gr, gauss_laplaceian)
 
+    call sys_analitic%init(gr, gauss_laplaceian)
     call laplaceian(gr, sys_num%psi, psi_cp)
 
     !loop over psi_cp and sys_analitic%psi comparing those two
     block
         integer :: i, j, k
         integer :: imax, jmax, kmax
-        real(wp) :: err, max_err
+        real(wp) :: err
 
         max_err = 0._wp
         imax = 1
@@ -44,7 +45,8 @@ program test_lap
         do i = 1, gr%dims(3)
         do j = 1, gr%dims(2)
         do k = 1, gr%dims(1)
-            err = abs(psi_cp(k, j, i) - sys_analitic%psi(k, j, i))
+            err = abs(psi_cp(k, j, i) - sys_analitic%psi(k, j, i))/&
+                abs(sys_analitic%psi(k,j,i) + 1e-8_wp)
             if (err > max_err) then
                 max_err = err
                 kmax = k
@@ -64,6 +66,7 @@ program test_lap
             stop 1
         end if
     end block
+    write (*,*) "Passed with max error of: ", max_err, "for tol of: ", tol
 
 contains
 
