@@ -284,44 +284,13 @@ def main(fout):
         indices = ["ii", "jj", "kk"]
         write_head(file, indices)
         # actuall logic here
-        signs_arr = [
-            ["i", "i", "i"],
+        signs = ["+", "-", "i"]
+        signs_arr = []
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
+                    signs_arr.append([signs[x] for x in (i, j, k)])
 
-            ["+", "i", "i"],
-            ["-", "i", "i"],
-
-            ["i", "+", "i"],
-            ["i", "-", "i"],
-
-            ["i", "i", "+"],
-            ["i", "i", "-"],
-
-            ["+", "+", "i"],
-            ["+", "-", "i"],
-
-            ["-", "+", "i"],
-            ["-", "-", "i"],
-
-            ["+", "i", "+"],
-            ["+", "i", "-"],
-            ["-", "i", "+"],
-            ["-", "i", "-"],
-
-            ["i", "+", "+"],
-            ["i", "+", "-"],
-            ["i", "-", "+"],
-            ["i", "-", "-"],
-
-            ["+", "+", "+"],
-            ["+", "+", "-"],
-            ["+", "-", "+"],
-            ["+", "-", "-"],
-
-            ["-", "+", "+"],
-            ["-", "+", "-"],
-            ["-", "-", "+"],
-            ["-", "-", "-"],
-        ]
         for signs in signs_arr:
             write_inner_outer(file, indices, signs)
             file.write("\n")
