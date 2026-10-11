@@ -55,9 +55,9 @@ contains
                           0:N(2) - 1, &
                           0:N(3) - 1))
 
-        allocate (gr%inv_dist(1:N(1) - 1, &
-                          1:N(2) - 1, &
-                          1:N(3) - 1))
+        allocate (gr%inv_dist(0:N(1) - 1, &
+                              0:N(2) - 1, &
+                              0:N(3) - 1))
 
         !tabelarize the distances
         do i = 0, N(3) - 1
@@ -73,13 +73,22 @@ contains
 
         !find inverses
         do i = 1, N(3) - 1
-        do j = 1, N(2) - 1
-        do k = 1, N(1) - 1
+        do j = 0, N(2) - 1
+        do k = 0, N(1) - 1
             gr%inv_dist(k, j, i) = 1._wp/gr%dist(k, j, i)
         end do
         end do
         end do
 
+        do j = 1, N(2) - 1
+        do k = 0, N(1) - 1
+            gr%inv_dist(k, j, 0) = 1._wp/gr%dist(k, j, 0)
+        end do
+        end do
+
+        do k = 1, N(1) - 1
+            gr%inv_dist(k, 0, 0) = 1._wp/gr%dist(k, 0, 0)
+        end do
 
     end subroutine init_grid
 
