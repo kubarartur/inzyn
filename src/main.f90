@@ -34,21 +34,21 @@ program main
     integer :: argc
     namelist /solver_params/ N, Nstep, box_size, dtau
 
-    !read the sovler params from file
-    io = 67
-    open (io, file="input.nml", status="old", action="read")
-    read (io, nml=solver_params)
-    close (io)
 
     argc = command_argument_count()
     if (argc < 1 .or. argc > 1) then
-        write (*, *) "Usage: main <output_dir>"
+        write (*, *) "Usage: main <input/output_dir>"
         stop 1
     end if
     block
         character(len=255) :: temp
         call get_command_argument(1, temp)
         out_dir_name = trim(temp)
+        !read the sovler params from file
+        io = 67
+        open (io, file=trim(temp)//"input.nml", status="old", action="read")
+        read (io, nml=solver_params)
+        close (io)
     end block
 
     box_size = box_size*m_to_a

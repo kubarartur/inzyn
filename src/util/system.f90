@@ -36,7 +36,7 @@ contains
         real(wp) :: r(3)
 
         sys%ncz = ncz
-        sys%nczr = real(sys%nczr)
+        sys%nczr = real(sys%ncz)
         allocate (sys%psi(gr%dims(1), gr%dims(2), gr%dims(3)))
 
         !initialize the wavefunction
