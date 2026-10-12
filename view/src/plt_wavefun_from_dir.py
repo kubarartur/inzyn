@@ -1,4 +1,3 @@
-import os
 import numpy as np
 
 from pathlib import Path
@@ -11,7 +10,6 @@ fig, ax = plt.subplots(1, 2)
 ax = ax.ravel()
 
 proj_root = Path(__file__).parents[2]
-print(f"the proj root is: {proj_root}")
 dirname = input("relative path from the project root: ")
 
 print("Reading: " + str(proj_root/dirname/"psi_init.txt"))

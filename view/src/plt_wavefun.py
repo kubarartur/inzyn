@@ -39,7 +39,7 @@ print("Reading: " + str(proj_root/f"data/run_{curr_num}/E_of_n.txt"))
 E_of_psi, extent = prs.readTxt1D(proj_root/f"data/run_{curr_num}/E_of_n.txt")
 extent = [int(x) for x in extent]
 
-skip_first = 5
+skip_first = 0
 fig, ax = plt.subplots()
 ax.plot(
     np.arange(extent[1])[skip_first:],
