@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(quantumDecaf
+project(inzyn
   DESCRIPTION "FOO BAR"
   LANGUAGES Fortran)
 
@@ -27,13 +27,13 @@ endif()
 # ---------------------------------------------------------------------------
 
 add_compile_options(
-# --- GNU (gfortran) Flags ---
-"$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,GNU>,$<CONFIG:Debug>>:-O0;-g;-Wall;-Wextra;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow>"
-"$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,GNU>,$<CONFIG:Release>>:-O3>"
+#gfortran
+"$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-O0;-g;-Wall;-Wextra;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow>"
+"$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Release>>:-O3>"
 
-# --- Intel (ifort / ifx) Flags ---
-"$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,Intel,IntelLLVM>,$<CONFIG:Debug>>:-O0;-g;-warn;all;-check;all;-traceback;-fpe0>"
-"$<$<AND:$<COMPILE_LANG_AND_ID:Fortran,Intel,IntelLLVM>,$<CONFIG:Release>>:-O3>"
+# ifort
+"$<$<AND:$<Fortran_COMPILER_ID:Intel,IntelLLVM>,$<CONFIG:Debug>>:-O0;-g;-warn;all;-check;all;-traceback;-fpe0>"
+"$<$<AND:$<Fortran_COMPILER_ID:Intel,IntelLLVM>,$<CONFIG:Release>>:-O3 -parallel>"
 )
 
 add_subdirectory(src)
