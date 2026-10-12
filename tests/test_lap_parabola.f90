@@ -39,11 +39,11 @@ program test_lap
 
     call gr%init(N, cell_size)
 
-    call sys_num%init(gr, parabola)
+    call sys_num%init(gr, parabola, 1)
     allocate (psi_cp, source=sys_num%psi)
     psi_cp = sys_num%psi
 
-    call sys_analitic%init(gr, parabola_diff)
+    call sys_analitic%init(gr, parabola_diff, 1)
     call laplaceian(gr, sys_num%psi, psi_cp)
 
     !loop over psi_cp and sys_analitic%psi comparing those two

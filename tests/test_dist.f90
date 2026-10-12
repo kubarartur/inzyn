@@ -25,7 +25,7 @@ program test_dist
                                                         2, 13, 7], [3, 5])
 
     call gr%init(N, cell_size)
-    call sys%init(gr, double_gaussian)
+    call sys%init(gr, double_gaussian, 1)
     call H%init(gr, sys, double_well)
 
     block

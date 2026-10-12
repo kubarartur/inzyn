@@ -60,8 +60,7 @@ contains
         !normalize the wavefunctoin
         call find_norm(sys%psi, gr%dr, norm_curr)
 
-        !norm equal to zero is not a valid state anyways
-        sys%psi = sys%psi/norm_curr
+        sys%psi = sqrt(sys%nczr)*sys%psi/norm_curr
     contains
         subroutine find_norm(arr, dr, norm)
             complex(wp), intent(in) :: arr(:, :, :)

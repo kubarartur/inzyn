@@ -23,6 +23,8 @@ program main
     !!unit conversion later on
     real(wp) :: dtau = 1e-5_wp
     !!timestep in the Wick's rotation
+    integer, parameter :: ncz = 10000
+    !!number of particles in the system
 
     real(wp) :: cell_size(3)
     complex(wp), allocatable :: energies(:)
@@ -53,7 +55,7 @@ program main
     cell_size = box_size/N
 
     call gr%init(N, cell_size)
-    call sys%init(gr, double_gaussian)
+    call sys%init(gr, double_gaussian, ncz)
     call H%init(gr, sys, double_well)
     call sol%init(dtau)
 

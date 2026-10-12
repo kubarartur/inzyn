@@ -7,6 +7,11 @@ module system_util
     type, public :: system
         !!system with: psi
         complex(wp), allocatable :: psi(:, :, :)
+        integer :: ncz
+        !!integer number of particles
+        !TODO: consider weather to keep this or not
+        real(wp) :: nczr
+        !! real copy of the number of particles to compute sqrt
     contains
         procedure :: init => init_system
         procedure :: copy => copy_system
@@ -21,14 +26,17 @@ module system_util
     end interface
 
 contains
-    subroutine init_system(sys, gr, psi0)
+    subroutine init_system(sys, gr, psi0, ncz)
         class(system), intent(out) :: sys
         type(grid_params), intent(in) :: gr
         procedure(init_cond_psi0) :: psi0
+        integer, intent(in) :: ncz
 
         integer :: i, j, k
         real(wp) :: r(3)
 
+        sys%ncz = ncz
+        sys%nczr = real(sys%nczr)
         allocate (sys%psi(gr%dims(1), gr%dims(2), gr%dims(3)))
 
         !initialize the wavefunction
