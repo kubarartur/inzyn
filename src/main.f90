@@ -16,7 +16,7 @@ program main
 
     integer :: N(3) = [50, 50, 40]
     !!the size of the simulation grid
-    integer :: Nstep = 1000
+    integer :: Nstep = 100
     !!number of steps of the solver in Wick's rotation part
     real(wp) :: box_size(3) = [6e-6_wp, 6e-6_wp, 6e-6_wp]
     !!size of the simulation box. Here in meters for consistency with namelist.

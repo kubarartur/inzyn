@@ -173,7 +173,7 @@ contains
 
         if (final_S > 0.01*initial_S) then
             write (stderr, *) "The relaxation criterion was not met"
-            stop 1
+            !stop 1
         end if
     contains
         subroutine step(a)

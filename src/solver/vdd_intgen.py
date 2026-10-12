@@ -19,12 +19,14 @@ contains
         type(grid_params), intent(in) :: gr
         real(wp), intent(in) :: dens(:,:,:)
 
-        real(wp), parameter :: one4opi = 0.25_wp/pi
+        real(wp) :: dVoneo4pi
         integer :: {endnames[0]}
         integer :: {endnames[1]}
         integer :: {endnames[2]}
         integer :: {inames[0]}, {inames[1]}, {inames[2]}
         integer :: {b_indices[0]}, {b_indices[1]}, {b_indices[2]}
+
+        dVoneo4pi= 0.25_wp/pi*gr%dr(1)*gr%dr(2)*gr%dr(3)
         """)
 
     # TODO: Find a better name for obnoxious one4opi
@@ -84,12 +86,12 @@ def write_loop(file, boundary_indices, indent=0):
     # loop over the points on boundary
     for index in boundary_indices:
         file.write(
-            " "*indent + f"do {b_indices[index]} = 2,{endnames[index]} \n")
+            " "*indent + f"do {b_indices[index]} = 2,{endnames[index]} - 1 \n")
         closure = closure + " "*indent + "end do\n"
 
     # loop over the points on the inside
     for i in range(2, -1, -1):
-        file.write(" "*indent + f"do {inames[i]} = 2,{endnames[i]} - 2\n")
+        file.write(" "*indent + f"do {inames[i]} = 2,{endnames[i]} - 1\n")
         closure = closure + " "*indent + "end do\n"
 
     # for each grid boundary point in this loops body
@@ -105,7 +107,7 @@ def write_loop(file, boundary_indices, indent=0):
             if k < 2:
                 file.write(",")
 
-        file.write(")*one4opi*&\n")
+        file.write(")*dVoneo4pi*&\n")
         file.write(" "*indent + "gr%inv_dist(")
 
         # dist indices
@@ -114,7 +116,7 @@ def write_loop(file, boundary_indices, indent=0):
                 file.write(" ")
             if arr_inputs[j][k] == "1":
                 file.write(f"{inames[k]} - {arr_inputs[j][k]}")
-            elif arr_inputs[i][k] in set_endnames:
+            elif arr_inputs[j][k] in set_endnames:
                 file.write(f"{arr_inputs[j][k]} - {inames[k]}")
             else:
                 file.write(f"abs({arr_inputs[j][k]} - {inames[k]})")
