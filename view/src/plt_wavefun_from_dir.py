@@ -33,7 +33,7 @@ extent = [int(x) for x in extent]
 skip_first = 0
 fig, ax = plt.subplots()
 ax.plot(
-    np.arange(extent[1])[skip_first:],
+    np.arange(extent[1] + 1)[skip_first:],
     np.real(E_of_psi)[skip_first:],
 )
 ax.set(

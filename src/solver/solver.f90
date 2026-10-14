@@ -31,11 +31,14 @@ contains
         sol%Euler_imag_dt = dt
     end subroutine init_solver
 
-    subroutine imag_step_solver(sol, gr, sys, H)
+    subroutine imag_step_solver(sol, gr, sys, H, no_recalc)
         class(solver), intent(inout) :: sol
         type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
         type(H_GPe), intent(inout) :: H
+        logical, optional, intent(in) :: no_recalc
+        !! if true then don't recalculate the H%Vdd and H%n
+        !! inside of H%apply
 
         complex(wp), allocatable :: psi_cp(:, :, :)
         real(wp) :: norm_curr
@@ -50,7 +53,11 @@ contains
         psi_cp = sys%psi
 
         !modify sys%psi in place
-        call H%apply(gr, sys)
+        if (present(no_recalc)) then
+            call H%apply(gr, sys, no_recalc=no_recalc)
+        else
+            call H%apply(gr, sys)
+        end if
 
         !make the step in forward Euler
         sys%psi = psi_cp - sol%Euler_imag_dt*sys%psi
@@ -75,39 +82,45 @@ contains
             do kk = 1, size(arr, 3)
             do jj = 1, size(arr, 2)
             do ii = 1, size(arr, 1)
-                norm = norm + dV*abs(arr(ii,jj,kk))**2
+                norm = norm + dV*abs(arr(ii, jj, kk))**2
             end do
             end do
             end do
             norm = sqrt(norm)
         end subroutine find_norm
-    end subroutine imag_step_solver
+        end subroutine imag_step_solver
 
-    subroutine find_E_solver(gr, sys, H, res)
-        type(grid_params), intent(in) :: gr
-        type(system), intent(in) :: sys
-        type(H_GPe), intent(inout) :: H
-        complex(wp), intent(out) :: res
+        subroutine find_E_solver(gr, sys, H, res, no_recalc)
+            type(grid_params), intent(in) :: gr
+            type(system), intent(in) :: sys
+            type(H_GPe), intent(inout) :: H
+            complex(wp), intent(out) :: res
+            logical, optional, intent(in) :: no_recalc
+            !! if true then don't recalculate the H%Vdd and H%n
+            !! inside of H%apply
 
-        type(system) :: sys_cp
-        integer :: i, j, k
+            type(system) :: sys_cp
+            integer :: i, j, k
 
-        call sys_cp%copy(sys)
-        !TODO: this refreshes the H%n and forces intent inout
-        !do something about it
-        !TODO 2: maybe a good thing though. If it's guaranteed to be called
-        ! then H%n and first of all expensive H%Vdd need not be recalculated
-        ! for the next imag timestep
-        call H%apply(gr, sys_cp)
+            call sys_cp%copy(sys)
+            !TODO: this refreshes the H%n and forces intent inout
+            !do something about it
+            !TODO 2: maybe a good thing though. If it's guaranteed to be called
+            ! then H%n and first of all expensive H%Vdd need not be recalculated
+            ! for the next imag timestep
+            if (present(no_recalc)) then
+                call H%apply(gr, sys_cp, no_recalc=no_recalc)
+            else
+                call H%apply(gr, sys_cp)
+            end if
+            res = (0._wp, 0._wp)
+            do k = 1, size(sys%psi, 3)
+            do j = 1, size(sys%psi, 2)
+            do i = 1, size(sys%psi, 1)
+                res = res + conjg(sys%psi(i, j, k))*sys_cp%psi(i, j, k)
+            end do
+            end do
+            end do
+        end subroutine find_E_solver
 
-        res = (0._wp, 0._wp)
-        do k=1,size(sys%psi, 3)
-        do j=1,size(sys%psi, 2)
-        do i=1,size(sys%psi, 1)
-            res = res + conjg(sys%psi(i,j,k))*sys_cp%psi(i,j,k)
-        end do
-        end do
-        end do
-    end subroutine find_E_solver
-
-end module solver_mod
+    end module solver_mod

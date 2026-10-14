@@ -57,11 +57,11 @@ module hamiltonian
             !! calculate the integral of the opsition space probability density
             !! dens, with the 1/4/pi/|r| kernel
             !! for the points at the boundary of 3D grid arr
-            real(wp), intent(out) :: arr(:,:,:)
+            real(wp), intent(out) :: arr(:, :, :)
             !! array which's boundaryu to populate
             type(grid_params), intent(in) :: gr
             !! grid in use
-            real(wp), intent(in) :: dens(:,:,:)
+            real(wp), intent(in) :: dens(:, :, :)
             !! probability density in the position space
         end subroutine vdd_boundary
     end interface
@@ -70,26 +70,32 @@ contains
     !TODO: ensure that the density is in pair with the wavefunction
     !the density refresh is not yet implemented
 
-    subroutine apply_HGPe(H, gr, sys)
+    subroutine apply_HGPe(H, gr, sys, no_recalc)
         class(H_GPe), intent(inout) :: H
         type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
+        logical, optional, intent(in) :: no_recalc
 
         complex(wp), allocatable :: psi_copy(:, :, :)
 
         !Refresh the stored density
         !additional saety check. Fail if the dimension were to not agree
         !instead of silent reallocation on assgnment
+        if (present(no_recalc)) then
+        if (.not. no_recalc) then
+            H%n(:, :, :) = abs(sys%psi)**2
+            call V_dd(H, gr)
+        end if
+        else
         H%n(:, :, :) = abs(sys%psi)**2
+        call V_dd(H, gr)
+        end if
 
         !TODO: consider doing something smarter
-        !this is expensive guessing not a bottleneck
         !allocation on assignment
         psi_copy = sys%psi
-
-        call V_dd(H, gr)
-
         call laplaceian(gr, psi_copy, sys%psi)
+
         sys%psi = -0.5_wp/m*sys%psi
         sys%psi = sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
     end subroutine apply_HGPe

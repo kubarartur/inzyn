@@ -62,9 +62,11 @@ program main
     call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", out_dir_name//"psi_init.txt")
     call write_arr(H%V_ext, gr, "The external trap potential", out_dir_name//"V_ext.txt")
 
-    allocate (energies(Nstep))
+    allocate (energies(0:Nstep))
+    call sol%find_E(gr, sys, H, energies(0))
+
     do i = 1, Nstep
-        call sol%step_imag(gr, sys, H)
+        call sol%step_imag(gr, sys, H, no_recalc=.true.)
         call sol%find_E(gr, sys, H, energies(i))
         write (*, *) "Step: ", i, "/", Nstep
     end do
