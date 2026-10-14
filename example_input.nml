@@ -1,0 +1,9 @@
+!rename this to input.nml and place in the input/output folder
+
+
+&solver_params
+   N = 50, 50, 30,
+   Nstep = 3,
+   box_size = 1e-5, 1e-5, 1e-5,
+   dtau = 1.25e11
+/
