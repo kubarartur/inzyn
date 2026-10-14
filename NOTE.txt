@@ -1,2 +1,0 @@
-why does a segfault happen when running with too big of a grid size
-visualisation and fortran dump parsing needs some love. Also consider addidng fancy custom names to fortran dump files
