@@ -98,6 +98,14 @@ contains
 
         sys%psi = -0.5_wp/m*sys%psi
         sys%psi = sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
+
+        !boundary conditions enforcement
+        sys%psi(1,:,:) = 0
+        sys%psi(size(sys%psi, 1),:,:) = 0
+        sys%psi(:,1,:) = 0
+        sys%psi(:,size(sys%psi, 2),:) = 0
+        sys%psi(:,:,1) = 0
+        sys%psi(:,:,size(sys%psi, 2)) = 0
     end subroutine apply_HGPe
 
     subroutine V_dd(H, gr)
