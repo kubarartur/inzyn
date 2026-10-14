@@ -2,8 +2,22 @@
 
 
 &solver_params
-   N = 50, 50, 30,
-   Nstep = 3,
-   box_size = 1e-5, 1e-5, 1e-5,
-   dtau = 1.25e11
+    N = 50, 50, 30,
+    Nstep = 3,
+    box_size = 1e-5, 1e-5, 1e-5,
+    dtau = 1.25e11,
+    ncz = 100000
+/
+
+&double_gaussian_parameters
+    !in micrometers
+    d = 1.9,
+    sigma = 1.5, 1.5, 1.5,
+    r01 = -1.9, 0., 0.,
+    r02 = 1.9, 0., 0.
+/
+
+&double_well_parameters
+    !in micrometers
+    d = 1.3,
 /

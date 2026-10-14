@@ -6,7 +6,12 @@ program main
     use :: solver_mod, only:solver
     use :: io, only:write_arr
     use :: phys_const, only:m_to_a => conv_m_to_a0
-    use :: initial_conditions, only:double_well, double_gaussian
+    use :: initial_conditions, only: &
+        double_well, &
+        double_gaussian, &
+        double_well_params, &
+        double_gaussian_params
+
     implicit none
 
     type(grid_params) :: gr
@@ -23,7 +28,7 @@ program main
     !!unit conversion later on
     real(wp) :: dtau = 1e-5_wp
     !!timestep in the Wick's rotation
-    integer, parameter :: ncz = 10000
+    integer :: ncz = 10000
     !!number of particles in the system
 
     real(wp) :: cell_size(3)
@@ -32,8 +37,7 @@ program main
     integer :: io
     character(len=:), allocatable :: out_dir_name
     integer :: argc
-    namelist /solver_params/ N, Nstep, box_size, dtau
-
+    namelist /solver_params/ N, Nstep, box_size, dtau, ncz
 
     argc = command_argument_count()
     if (argc < 1 .or. argc > 1) then
@@ -49,6 +53,8 @@ program main
         open (io, file=trim(temp)//"input.nml", status="old", action="read")
         read (io, nml=solver_params)
         close (io)
+        call double_gaussian_params%read_params(trim(temp)//"input.nml")
+        call double_well_params%read_params(trim(temp)//"input.nml")
     end block
 
     box_size = box_size*m_to_a

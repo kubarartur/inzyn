@@ -105,7 +105,7 @@ contains
         sys%psi(:,1,:) = 0
         sys%psi(:,size(sys%psi, 2),:) = 0
         sys%psi(:,:,1) = 0
-        sys%psi(:,:,size(sys%psi, 2)) = 0
+        sys%psi(:,:,size(sys%psi, 3)) = 0
     end subroutine apply_HGPe
 
     subroutine V_dd(H, gr)
