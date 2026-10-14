@@ -95,6 +95,9 @@ contains
         call sys_cp%copy(sys)
         !TODO: this refreshes the H%n and forces intent inout
         !do something about it
+        !TODO 2: maybe a good thing though. If it's guaranteed to be called
+        ! then H%n and first of all expensive H%Vdd need not be recalculated
+        ! for the next imag timestep
         call H%apply(gr, sys_cp)
 
         res = (0._wp, 0._wp)

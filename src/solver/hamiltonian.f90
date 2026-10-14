@@ -105,6 +105,8 @@ contains
 
         !TODO: Does it have to be like that?
         allocate (n_copy, source=H%n)
+
+        !TODO!:possibly redundant assignment!!!
         n_copy = H%n
 
         !find the boundary condition for the laplace's equation
