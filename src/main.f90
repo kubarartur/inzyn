@@ -34,7 +34,7 @@ program main
     real(wp) :: cell_size(3)
     complex(wp), allocatable :: energies(:)
     integer :: i
-    integer :: io
+    integer :: iout
     character(len=:), allocatable :: out_dir_name
     integer :: argc
     namelist /solver_params/ N, Nstep, box_size, dtau, ncz
@@ -49,10 +49,10 @@ program main
         call get_command_argument(1, temp)
         out_dir_name = trim(temp)
         !read the sovler params from file
-        io = 67
-        open (io, file=trim(temp)//"input.nml", status="old", action="read")
-        read (io, nml=solver_params)
-        close (io)
+        iout = 67
+        open (iout, file=trim(temp)//"input.nml", status="old", action="read")
+        read (iout, nml=solver_params)
+        close (iout)
         call double_gaussian_params%read_params(trim(temp)//"input.nml")
         call double_well_params%read_params(trim(temp)//"input.nml")
     end block
