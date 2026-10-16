@@ -160,7 +160,7 @@ contains
 
         integer :: iter
         real(wp) :: initial_S
-        real(wp) :: final_S
+        real(wp) :: final_S(2)
 
         !TODO: figure out a smarter name for this variable
         real(wp) :: multip
@@ -185,9 +185,13 @@ contains
         end do
 
         !determine the final action functional value
-        call calc_action(arr, final_S)
+        call calc_action(arr, final_S(1))
+        do iter = 1, N_step
+            call step(arr)
+        end do
+        call calc_action(arr, final_S(2))
 
-        if (final_S > 0.01*initial_S) then
+        if (final_S(1) - final_S(2) > 1e-8) then
             write (stderr, *) "The relaxation criterion was not met"
             !stop 1
         end if
