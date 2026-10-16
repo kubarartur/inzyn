@@ -14,7 +14,7 @@ submodule(hamiltonian) autogen_vdd_boundary
     implicit none
 contains
 
-    subroutine vdd_boundary(arr, gr, dens)
+    module subroutine vdd_boundary(arr, gr, dens)
         real(wp), intent(out) :: arr(:,:,:)
         type(grid_params), intent(in) :: gr
         real(wp), intent(in) :: dens(:,:,:)

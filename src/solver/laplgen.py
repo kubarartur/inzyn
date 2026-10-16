@@ -10,7 +10,7 @@ submodule(hamiltonian) autogen_lagrangeian
     implicit none
 contains
 
-    subroutine laplaceian(gr, psi_in, psi_out)
+    module subroutine laplaceian(gr, psi_in, psi_out)
         type(grid_params), intent(in) :: gr
         complex(wp), intent(in) :: psi_in(:,:,:)
         complex(wp), intent(out) :: psi_out(:,:,:)
