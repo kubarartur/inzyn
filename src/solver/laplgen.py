@@ -268,7 +268,8 @@ def write_inner_outer(file, indices, signs):
         elif signs[i] == "-":
             write_backward_diff(file, indices_inner, i, indent=16)
         else:
-            raise ValueError(f"Expected +,- or i as sign got : {signs[i]} ")
+            raise ValueError(
+                "Expected +,- or i as sign got : {sign} ".format(sign=signs[i]))
 
         if i < 2:
             file.write("+ &\n")
