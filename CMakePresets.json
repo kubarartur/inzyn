@@ -30,6 +30,17 @@
           "CMAKE_BUILD_TYPE": "RelWithDebInfo",
           "BUILD_TESTING": "OFF"
       }
+    },
+    {
+      "name": "Euler",
+      "displayName": "default Preset",
+      "description": "some default preset blah",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Release",
+          "BUILD_TESTING": "OFF",
+          "CMAKE_Fortran_COMPILER": "ifort"
+      }
     }
   ]
 }
