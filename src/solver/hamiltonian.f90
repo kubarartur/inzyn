@@ -82,13 +82,13 @@ contains
         !additional saety check. Fail if the dimension were to not agree
         !instead of silent reallocation on assgnment
         if (present(no_recalc)) then
-        if (.not. no_recalc) then
+            if (.not. no_recalc) then
+                H%n(:, :, :) = abs(sys%psi)**2
+                call V_dd(H, gr)
+            end if
+        else
             H%n(:, :, :) = abs(sys%psi)**2
             call V_dd(H, gr)
-        end if
-        else
-        H%n(:, :, :) = abs(sys%psi)**2
-        call V_dd(H, gr)
         end if
 
         !TODO: consider doing something smarter
@@ -100,12 +100,12 @@ contains
         sys%psi = sys%psi + (H%V_ext + gcont*H%n + gLHY*H%n*abs(psi_copy) + H%vdd)*psi_copy
 
         !boundary conditions enforcement
-        sys%psi(1,:,:) = 0
-        sys%psi(size(sys%psi, 1),:,:) = 0
-        sys%psi(:,1,:) = 0
-        sys%psi(:,size(sys%psi, 2),:) = 0
-        sys%psi(:,:,1) = 0
-        sys%psi(:,:,size(sys%psi, 3)) = 0
+        sys%psi(1, :, :) = 0
+        sys%psi(size(sys%psi, 1), :, :) = 0
+        sys%psi(:, 1, :) = 0
+        sys%psi(:, size(sys%psi, 2), :) = 0
+        sys%psi(:, :, 1) = 0
+        sys%psi(:, :, size(sys%psi, 3)) = 0
     end subroutine apply_HGPe
 
     subroutine V_dd(H, gr)
@@ -114,32 +114,29 @@ contains
         type(H_GPe), intent(inout) :: H
         type(grid_params), intent(in) :: gr
 
-        real(wp), allocatable :: n_copy(:, :, :)
+        real(wp), allocatable :: phi(:, :, :)
         integer :: i, j, k
 
-        !TODO: Does it have to be like that?
-        allocate (n_copy, source=H%n)
+        allocate (phi, source=H%n)
 
-        !TODO!:possibly redundant assignment!!!
-        n_copy = H%n
 
         !find the boundary condition for the laplace's equation
-        call vdd_boundary(n_copy, gr, H%n)
-        !modification in place
-        call overrelax_lapl3D(n_copy, H%n, gr%dr)
+        call vdd_boundary(phi, gr, H%n)
+        !modification in place of phi. Sol to \Nabla^2 phi = H%n
+        !with boundary conditions given by what's at the boundary of phi
+        call overrelax_lapl3D(phi, H%n, gr%dr)
 
-        do k = 2, size(n_copy, 3) - 1
-        do j = 1, size(n_copy, 2)
-        do i = 1, size(n_copy, 1)
+        do k = 2, size(phi, 3) - 1
+        do j = 1, size(phi, 2)
+        do i = 1, size(phi, 1)
             !central difference for the second derrivative
             !along the dipole axis (z)
-            H%vdd(i, j, k) = (n_copy(i, j, k + 1) - 2*n_copy(i, j, k) + n_copy(i, j, k - 1))/gr%dr(3)**2
+            H%vdd(i, j, k) = (phi(i, j, k + 1) - 2*phi(i, j, k) + phi(i, j, k - 1))/gr%dr(3)**2
         end do
         end do
         end do
 
         !add the term with Kroneker's delta
-        !important: here no longer is H%n equal to n_copy
         H%vdd = H%vdd + one_third*H%n
 
         !correct scaling constant
@@ -191,7 +188,7 @@ contains
         end do
         call calc_action(arr, final_S(2))
 
-        if (final_S(1) - final_S(2) > 1e-8) then
+        if (abs(final_S(1) - final_S(2)) > 1e-8) then
             write (stderr, *) "The relaxation criterion was not met"
             !stop 1
         end if
