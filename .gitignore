@@ -9,3 +9,4 @@ perf.*
 input.nml
 in.batch
 *.out
+euler_runs/
