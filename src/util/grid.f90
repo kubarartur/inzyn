@@ -24,6 +24,7 @@ module grid_util
 
     end type grid_params
 
+    public :: norm
 contains
 
     !> Initialize instance of [[system]]
@@ -92,4 +93,25 @@ contains
 
     end subroutine init_grid
 
+    subroutine norm(arr, nczr, dr)
+        complex(wp), intent(inout) :: arr(:, :, :)
+        real(wp), intent(in) :: nczr
+        real(wp), intent(in) :: dr(3)
+
+        integer :: ii, jj, kk
+        real(wp) :: nor
+        real(wp) :: dV
+        dV = dr(1)*dr(2)*dr(3)
+        nor = 0
+
+        do kk = 1, size(arr, 3)
+        do jj = 1, size(arr, 2)
+        do ii = 1, size(arr, 1)
+            nor = nor + dV*abs(arr(ii, jj, kk))**2
+        end do
+        end do
+        end do
+
+        arr = sqrt(nczr)*arr/sqrt(nor)
+    end subroutine norm
 end module grid_util

@@ -1,6 +1,6 @@
 program main
     use :: typedef, only:wp
-    use :: grid_util, only:grid_params
+    use :: grid_util, only:grid_params, norm
     use :: system_util, only:system
     use :: hamiltonian, only:H_GPe
     use :: solver_mod, only:solver
@@ -65,16 +65,19 @@ program main
     call H%init(gr, sys, double_well)
     call sol%init(dtau)
 
+    call norm(sys%psi, sys%nczr, gr%dr)
     call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", out_dir_name//"psi_init.txt")
     call write_arr(H%V_ext, gr, "The external trap potential", out_dir_name//"V_ext.txt")
 
     allocate (energies(0:Nstep))
+
     call sol%find_E(gr, sys, H, energies(0))
 
     do i = 1, Nstep
         call sol%step_imag(gr, sys, H, no_recalc=.true.)
         call sol%find_E(gr, sys, H, energies(i))
         write (*, *) "Step: ", i, "/", Nstep
+        write (*, *) "Ediff: ", energies(i-1) - energies(i)
     end do
 
     call write_arr(sys%psi, gr, "Result of the ground state seek", out_dir_name//"psi_final.txt")
