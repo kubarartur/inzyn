@@ -106,8 +106,8 @@ contains
 
             type(system) :: sys_cp
             integer :: i, j, k
-            !real(wp) :: dV
-            !dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
+            real(wp) :: dV
+            dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
 
             call sys_cp%copy(sys)
 

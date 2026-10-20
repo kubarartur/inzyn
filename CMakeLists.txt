@@ -3,16 +3,11 @@ cmake_minimum_required(VERSION 3.23)
 project(inzyn
   DESCRIPTION "FOO BAR"
   LANGUAGES Fortran)
+find_package(OpenMP REQUIRED)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Disable Position Independent Code globally (creates statically linked code)
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
-# Enable Link Time Optimization (LTO / IPO) for Release builds only.
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
-
-# Optional but recommended: Check if the current compiler actually supports IPO
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 if(ipo_supported)
@@ -20,11 +15,6 @@ if(ipo_supported)
 else()
     message(WARNING "IPO/LTO is not supported by this compiler: ${error}")
 endif()
-
-
-# ---------------------------------------------------------------------------
-# 2. Compiler-Specific Flags via Generator Expressions
-# ---------------------------------------------------------------------------
 
 add_compile_options(
 #gfortran
