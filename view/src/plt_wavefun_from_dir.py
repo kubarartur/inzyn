@@ -16,6 +16,10 @@ print("Reading: " + str(proj_root/dirname/"psi_init.txt"))
 grid_init = prs.readTxt(
     proj_root/dirname/"psi_init.txt")
 
+print("Reading: " + str(proj_root/dirname/"V_ext.txt"))
+grid_V = prs.readTxt(
+    proj_root/dirname/"V_ext.txt")
+
 print("Reading: " + str(proj_root/dirname/"psi_final.txt"))
 grid_final = prs.readTxt(
     proj_root/dirname/"psi_final.txt")
@@ -24,6 +28,20 @@ gplt.plotN2(grid_init, ax[0])
 ax[0].set_title("Initial conditions")
 gplt.plotN2(grid_final, ax[1])
 ax[1].set_title("Result of minimal energy seek")
+plt.show()
+
+fig, ax = plt.subplots(1, 2)
+ax = ax.ravel()
+gplt.plotN2(grid_V, ax[0])
+left, right, top, bottom = grid_V.getExtent((0, 1))
+_, _, back, forth = grid_V.getExtent((0, 2))
+
+n = grid_V.vals.shape
+print(n)
+ax[1].plot(np.linspace(left, right, n[0]), grid_V.vals[:, n[1]//2, n[2]//2])
+ax[1].plot(np.linspace(top, bottom, n[1]), grid_V.vals[n[0]//2, :, n[2]//2])
+ax[1].plot(np.linspace(top, bottom, n[2]), grid_V.vals[n[0]//2, n[1]//2, :])
+plt.title("External potential")
 plt.show()
 
 print("Reading: " + str(proj_root/dirname/"E_of_n.txt"))
