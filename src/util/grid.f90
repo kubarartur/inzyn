@@ -21,7 +21,6 @@ module grid_util
 
         procedure :: init => init_grid
         !!initialize the grid
-
     end type grid_params
 
     public :: norm
@@ -30,15 +29,15 @@ contains
     !> Initialize instance of [[system]]
     subroutine init_grid(gr, N, dr, bottom_left_corner)
         class(grid_params), intent(out) :: gr
-            !!uninitialized grid_params instance
+        !!uninitialized grid_params instance
         integer, intent(in) :: N(3)
-            !!number of cells in each of the dimensions
+        !!number of cells in each of the dimensions
         real(wp), intent(in) :: dr(3)
-            !!size of the grid cell in each dimension
-        real(wp), intent(in), optional :: bottom_left_corner
-            !!real position correspoinding to the bottom left corner of the simulation grid
-            !!to make the arithme tic easy this is the center of imaginary cell(0,0,0)
-            !! r{cell(i,j,k)}= blc + [i,j,k]*dr
+        !!size of the grid cell in each dimension
+        real(wp), intent(in), optional :: bottom_left_corner(3)
+        !!real position correspoinding to the bottom left corner of the simulation grid
+        !!to make the arithme tic easy this is the center of imaginary cell(0,0,0)
+        !! r{cell(i,j,k)}= blc + [i,j,k]*dr
 
         integer :: i, j, k
         real(wp) :: r(3)
@@ -93,9 +92,9 @@ contains
 
     end subroutine init_grid
 
-    subroutine norm(arr, nczr, dr)
+    subroutine norm(arr, ncz, dr)
         complex(wp), intent(inout) :: arr(:, :, :)
-        real(wp), intent(in) :: nczr
+        integer, intent(in) :: ncz
         real(wp), intent(in) :: dr(3)
 
         integer :: ii, jj, kk
@@ -111,7 +110,6 @@ contains
         end do
         end do
         end do
-
-        arr = sqrt(nczr)*arr/sqrt(nor)
+        arr(:,:,:) = sqrt(1._wp*ncz)*arr/sqrt(nor)
     end subroutine norm
 end module grid_util

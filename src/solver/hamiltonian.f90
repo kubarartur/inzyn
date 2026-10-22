@@ -2,6 +2,7 @@ module hamiltonian
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
     use :: system_util, only:system
+    use :: initial_conditions, only:real_functor
     use :: phys_const, only: &
         cdd => const_cdd, &
         pi => const_pi, &
@@ -28,14 +29,6 @@ module hamiltonian
         procedure, public :: init => init_HGPe
         procedure, public :: apply => apply_HGPe
     end type
-
-    abstract interface
-        pure subroutine V_ext0(r, val)
-            use :: typedef
-            real(wp), intent(in) :: r(3)
-            real(wp), intent(out) :: val
-        end subroutine V_ext0
-    end interface
 
     !TODO: public only for testing purposes. Possible to to change?
     public :: laplaceian
@@ -239,11 +232,11 @@ contains
         end subroutine calc_action
     end subroutine overrelax_Lapl3D
 
-    subroutine init_HGPe(H, gr, sys, V_ext)
+    subroutine init_HGPe(H, gr, sys, V_ex)
         class(H_GPe), intent(out) :: H
         type(grid_params), intent(in) :: gr
         type(system), intent(in) :: sys
-        procedure(V_ext0) :: V_ext
+        class(real_functor), intent(in) :: V_ex
 
         integer :: i, j, k
         real(wp) :: r(3)
@@ -259,7 +252,7 @@ contains
                 r(2) = gr%blc(2) + j*gr%dr(2)
                 do k = 1, gr%dims(1)
                     r(1) = gr%blc(1) + k*gr%dr(1)
-                    call V_ext(r, H%V_ext(k, j, i))
+                    call V_ex%eval(r, H%V_ext(k, j, i))
                 end do
             end do
         end do

@@ -3,14 +3,16 @@ program test_dist
     use :: grid_util, only:grid_params
     use :: system_util, only:system
     use :: hamiltonian, only:H_GPe
-    use :: io, only:write_arr
+    use :: arr_iout, only:write_arr
     use :: phys_const, only:m_to_a => conv_m_to_a0
-    use :: initial_conditions, only:double_well, double_gaussian
+    use :: initial_conditions, only:real_functor, compl_functor, get_real_functor, get_compl_functor
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
     implicit none
 
     real(wp), parameter :: tol = 1e-11_wp
 
+    class(compl_functor), allocatable :: dgauss
+    class(real_functor), allocatable :: dwell
     type(grid_params) :: gr
     type(system) :: sys
     type(H_GPe) :: H
@@ -24,9 +26,11 @@ program test_dist
                                                         2, 2, 2, &
                                                         2, 13, 7], [3, 5])
 
+    dgauss = get_compl_functor("double_gaussian")
+    dwell = get_real_functor("double_well")
     call gr%init(N, cell_size)
-    call sys%init(gr, double_gaussian, 1)
-    call H%init(gr, sys, double_well)
+    call sys%init(gr, dgauss, 1)
+    call H%init(gr, sys, dwell)
 
     block
         integer :: i, j

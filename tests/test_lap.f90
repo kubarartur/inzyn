@@ -4,6 +4,7 @@ program test_lap
     use :: hamiltonian, only:laplaceian
     use :: grid_util, only:grid_params
     use :: system_util, only:system
+    use :: mod_test_lap, only:gaupsi0, psi_analitic
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
     implicit none
 
@@ -17,19 +18,19 @@ program test_lap
     real(wp), parameter :: tol = 1e-2_wp
     real(wp) :: max_err
 
-    !width and wavevector small enough that O(h^2) FD error stays under tol
-    real(wp), parameter :: alpha = 1.0e-4_wp
-    real(wp), parameter :: kvec(3) = [2.0e-2_wp, 3.0e-2_wp, 1.5e-2_wp]
+    complex(wp), allocatable :: psi_cp(:, :, :)
 
-    complex(wp), allocatable :: psi_cp(:,:,:)
+
+    type(gaupsi0) :: gausspsi0
+    type(psi_analitic) :: psia
 
     call gr%init(N, cell_size)
 
-    call sys_num%init(gr, gauss_psi0, 1)
-    allocate(psi_cp, source=sys_num%psi)
+    call sys_num%init(gr, gausspsi0, 1)
+    allocate (psi_cp, source=sys_num%psi)
     psi_cp = sys_num%psi
 
-    call sys_analitic%init(gr, gauss_laplaceian, 1)
+    call sys_analitic%init(gr, psia, 1)
     call laplaceian(gr, sys_num%psi, psi_cp)
 
     !loop over psi_cp and sys_analitic%psi comparing those two
@@ -45,8 +46,8 @@ program test_lap
         do i = 1, gr%dims(3)
         do j = 1, gr%dims(2)
         do k = 1, gr%dims(1)
-            err = abs(psi_cp(k, j, i) - sys_analitic%psi(k, j, i))/&
-                abs(sys_analitic%psi(k,j,i) + 1e-8_wp)
+            err = abs(psi_cp(k, j, i) - sys_analitic%psi(k, j, i))/ &
+                  abs(sys_analitic%psi(k, j, i) + 1e-8_wp)
             if (err > max_err) then
                 max_err = err
                 kmax = k
@@ -66,36 +67,8 @@ program test_lap
             stop 1
         end if
     end block
-    write (*,*) "Passed with max error of: ", max_err, "for tol of: ", tol
+    write (*, *) "Passed with max error of: ", max_err, "for tol of: ", tol
 
 contains
 
-    !initial conditions subroutine conforming to
-    !abstract interface ./src/util/system
-    !this is reasonably smooth and importantly has a known laplacian
-    pure subroutine gauss_psi0(r, val)
-        real(wp), intent(in) :: r(3)
-        complex(wp), intent(out) :: val
-
-        val = exp(-alpha*sum(r**2))*exp(cmplx(0._wp, sum(kvec*r), kind=wp))
-    end subroutine gauss_psi0
-
-    !the analitical laplaceian of those initial conditions
-    !abstract interface ./src/util/system
-    pure subroutine gauss_laplaceian(r, val)
-        real(wp), intent(in) :: r(3)
-        complex(wp), intent(out) :: val
-
-        complex(wp) :: psi
-        real(wp) :: r2, k2, kr
-
-        r2 = sum(r**2)
-        k2 = sum(kvec**2)
-        kr = sum(kvec*r)
-        call gauss_psi0(r, psi)
-        ! nabla^2 [exp(-alpha r^2) exp(i k.r)]
-        !   = [4 alpha^2 r^2 - 6 alpha - |k|^2 - 4 i alpha (k.r)] psi
-        val = (4._wp*alpha**2*r2 - 6._wp*alpha - k2)*psi
-        val = val - cmplx(0._wp, 4._wp*alpha*kr, kind=wp)*psi
-    end subroutine gauss_laplaceian
 end program test_lap

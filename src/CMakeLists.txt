@@ -1,5 +1,6 @@
 add_subdirectory(util)
 add_subdirectory(solver)
+add_subdirectory(inout)
 
 add_executable(main)
 target_sources(main PRIVATE
@@ -8,6 +9,7 @@ target_sources(main PRIVATE
 target_link_libraries(main PRIVATE
 util
 solver
+inout
 OpenMP::OpenMP_Fortran
 )
 

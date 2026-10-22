@@ -5,7 +5,6 @@ target_sources(util PRIVATE
   grid.f90
   system.f90
   initial_conditions.f90
-  io.f90
 )
 
 set_target_properties(util PROPERTIES

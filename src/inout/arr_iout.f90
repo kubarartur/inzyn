@@ -1,4 +1,4 @@
-module io
+module arr_iout
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
     implicit none
@@ -104,4 +104,4 @@ contains
 
         close (io)
     end subroutine write_arr_compl1d
-end module io
+end module arr_iout

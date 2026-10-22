@@ -1,3 +1,5 @@
+add_subdirectory(modules)
+
 file(GLOB reg_targets_sources *.f90)
 
 foreach(target_source ${reg_targets_sources})
@@ -8,6 +10,8 @@ foreach(target_source ${reg_targets_sources})
         PRIVATE
             util
             solver
+            inout
+            testmodules
     )
 endforeach()
 
@@ -20,6 +24,9 @@ foreach(target_source ${fpp_targets_sources})
     target_link_libraries( ${bfname}
         PRIVATE
             util
+            solver
+            inout
+            testmodules
     )
     target_compile_definitions(${bfname}
         PRIVATE

@@ -1,6 +1,7 @@
 module system_util
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
+    use :: initial_conditions, only:compl_functor
     implicit none
     private
 
@@ -17,19 +18,12 @@ module system_util
         procedure :: copy => copy_system
     end type system
 
-    abstract interface
-        pure subroutine init_cond_psi0(r, val)
-            use :: typedef
-            real(wp), intent(in) :: r(3)
-            complex(wp), intent(out) :: val
-        end subroutine init_cond_psi0
-    end interface
 
 contains
     subroutine init_system(sys, gr, psi0, ncz)
         class(system), intent(out) :: sys
         type(grid_params), intent(in) :: gr
-        procedure(init_cond_psi0) :: psi0
+        class(compl_functor) :: psi0
         integer, intent(in) :: ncz
 
         integer :: i, j, k
@@ -46,7 +40,7 @@ contains
                 r(2) = gr%blc(2) + j*gr%dr(2)
                 do k = 1, gr%dims(1)
                     r(1) = gr%blc(1) + k*gr%dr(1)
-                    call psi0(r, sys%psi(k, j, i))
+                    call psi0%eval(r, sys%psi(k, j, i))
                 end do
             end do
         end do

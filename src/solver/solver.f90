@@ -13,7 +13,11 @@ module solver_mod
         !!timestep in forward Euler integrator for finding the gound state
         !!using Wick's rotation
         real(wp) :: time
+        !!total time spent iterating
         integer :: nsteps
+        !!current number of steps already done
+        integer :: steps_todo
+        !! total number of steps to be done
 
     contains
         procedure :: init => init_solver
@@ -22,13 +26,15 @@ module solver_mod
     end type solver
 contains
 
-    subroutine init_solver(sol, dt)
+    subroutine init_solver(sol, dt, std)
         class(solver), intent(out) :: sol
         real(wp), intent(in) :: dt
+        integer, intent(in) :: std
 
         sol%nsteps = 0
         sol%time = 0._wp
         sol%Euler_imag_dt = dt
+        sol%steps_todo = std
     end subroutine init_solver
 
     subroutine imag_step_solver(sol, gr, sys, H, no_recalc, norm_first)
@@ -44,8 +50,8 @@ contains
         complex(wp), allocatable :: psi_cp(:, :, :)
         real(wp) :: norm_curr
 
-        if(present(norm_first)) then
-            if(norm_first) then
+        if (present(norm_first)) then
+            if (norm_first) then
                 call find_norm(sys%psi, gr%dr, norm_curr)
                 sys%psi = sqrt(sys%nczr)*sys%psi/norm_curr
             end if
@@ -93,37 +99,37 @@ contains
             end do
             norm = sqrt(norm)
         end subroutine find_norm
-        end subroutine imag_step_solver
+    end subroutine imag_step_solver
 
-        subroutine find_E_solver(gr, sys, H, res, no_recalc)
-            type(grid_params), intent(in) :: gr
-            type(system), intent(in) :: sys
-            type(H_GPe), intent(inout) :: H
-            complex(wp), intent(out) :: res
-            logical, optional, intent(in) :: no_recalc
+    subroutine find_E_solver(gr, sys, H, res, no_recalc)
+        type(grid_params), intent(in) :: gr
+        type(system), intent(in) :: sys
+        type(H_GPe), intent(inout) :: H
+        complex(wp), intent(out) :: res
+        logical, optional, intent(in) :: no_recalc
             !! if true then don't recalculate the H%Vdd and H%n
             !! inside of H%apply
 
-            type(system) :: sys_cp
-            integer :: i, j, k
-            real(wp) :: dV
-            dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
+        type(system) :: sys_cp
+        integer :: i, j, k
+        real(wp) :: dV
+        dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
 
-            call sys_cp%copy(sys)
+        call sys_cp%copy(sys)
 
-            if (present(no_recalc)) then
-                call H%apply(gr, sys_cp, no_recalc=no_recalc)
-            else
-                call H%apply(gr, sys_cp)
-            end if
-            res = (0._wp, 0._wp)
-            do k = 1, size(sys%psi, 3)
-            do j = 1, size(sys%psi, 2)
-            do i = 1, size(sys%psi, 1)
-                res = res + dV*conjg(sys%psi(i, j, k))*sys_cp%psi(i, j, k)
-            end do
-            end do
-            end do
-        end subroutine find_E_solver
+        if (present(no_recalc)) then
+            call H%apply(gr, sys_cp, no_recalc=no_recalc)
+        else
+            call H%apply(gr, sys_cp)
+        end if
+        res = (0._wp, 0._wp)
+        do k = 1, size(sys%psi, 3)
+        do j = 1, size(sys%psi, 2)
+        do i = 1, size(sys%psi, 1)
+            res = res + dV*conjg(sys%psi(i, j, k))*sys_cp%psi(i, j, k)
+        end do
+        end do
+        end do
+    end subroutine find_E_solver
 
-    end module solver_mod
+end module solver_mod
