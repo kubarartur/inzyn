@@ -6,6 +6,8 @@ import util.txt_parser as prs
 import util.plt_grid as gplt
 
 
+nm_to_atm = 1/0.0529177
+
 fig, ax = plt.subplots(1, 2)
 ax = ax.ravel()
 
@@ -38,9 +40,12 @@ _, _, back, forth = grid_V.getExtent((0, 2))
 
 n = grid_V.vals.shape
 print(n)
-ax[1].plot(np.linspace(left, right, n[0]), grid_V.vals[:, n[1]//2, n[2]//2])
-ax[1].plot(np.linspace(top, bottom, n[1]), grid_V.vals[n[0]//2, :, n[2]//2])
-ax[1].plot(np.linspace(top, bottom, n[2]), grid_V.vals[n[0]//2, n[1]//2, :])
+ax[1].plot(np.linspace(left, right, n[0])/nm_to_atm,
+           grid_V.vals[:, n[1]//2, n[2]//2])
+ax[1].plot(np.linspace(top, bottom, n[1])/nm_to_atm,
+           grid_V.vals[n[0]//2, :, n[2]//2])
+ax[1].plot(np.linspace(top, bottom, n[2])/nm_to_atm,
+           grid_V.vals[n[0]//2, n[1]//2, :])
 plt.title("External potential")
 plt.show()
 

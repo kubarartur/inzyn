@@ -1,12 +1,13 @@
 module initializer
     use :: typedef, only:wp
     use :: phys_const, only:m_to_a => conv_m_to_a0
-    use :: initial_conditions, only:real_functor, compl_functor, get_real_functor, get_compl_functor
     use :: grid_util, only:grid_params
     use :: solver_mod, only:solver
     use :: system_util, only:system
     use :: hamiltonian, only:H_GPe
-
+    use :: functor, only:real_functor, compl_functor
+    use :: double_gaussian_mod, only:double_gaussian
+    use :: double_well_mod, only:double_well
     implicit none
 
 contains
@@ -103,4 +104,21 @@ contains
         end subroutine init_H
     end subroutine innit
 
+    function get_real_functor(funname) result(func)
+        character(len=*), intent(in) :: funname
+        class(real_functor), allocatable :: func
+
+        if (trim(funname) == "double_well") then
+            allocate (double_well :: func)
+        end if
+    end function get_real_functor
+
+    function get_compl_functor(funname) result(func)
+        character(len=*), intent(in) :: funname
+        class(compl_functor), allocatable :: func
+
+        if (trim(funname) == "double_gaussian") then
+            allocate (double_gaussian :: func)
+        end if
+    end function get_compl_functor
 end module initializer

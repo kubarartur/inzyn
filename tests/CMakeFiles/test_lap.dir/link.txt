@@ -1,1 +1,0 @@
-/usr/bin/f95 CMakeFiles/test_lap.dir/test_lap.f90.o -o test_lap  ../src/util/libutil.a ../src/solver/libsolver.a ../src/inout/libinout.a modules/libtestmodules.a ../src/solver/libsolver.a ../src/util/libutil.a 

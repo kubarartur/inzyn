@@ -7,9 +7,9 @@ target_sources(main PRIVATE
   main.f90)
 
 target_link_libraries(main PRIVATE
-util
-solver
-inout
-OpenMP::OpenMP_Fortran
+  util
+  solver
+  inout
+  OpenMP::OpenMP_Fortran
 )
 

@@ -1,7 +1,7 @@
 module system_util
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
-    use :: initial_conditions, only:compl_functor
+    use :: functor, only:compl_functor
     implicit none
     private
 

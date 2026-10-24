@@ -5,7 +5,8 @@ program test_dist
     use :: hamiltonian, only:H_GPe
     use :: arr_iout, only:write_arr
     use :: phys_const, only:m_to_a => conv_m_to_a0
-    use :: initial_conditions, only:real_functor, compl_functor, get_real_functor, get_compl_functor
+    use :: functor, only:real_functor, compl_functor
+    use :: initializer, only:get_real_functor, get_compl_functor
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
     implicit none
 

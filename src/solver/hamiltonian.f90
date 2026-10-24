@@ -2,7 +2,7 @@ module hamiltonian
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
     use :: system_util, only:system
-    use :: initial_conditions, only:real_functor
+    use :: functor, only:real_functor
     use :: phys_const, only: &
         cdd => const_cdd, &
         pi => const_pi, &

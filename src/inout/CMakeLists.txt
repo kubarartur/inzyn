@@ -3,6 +3,7 @@ target_sources(inout PRIVATE
   initializer.f90
   arr_iout.f90
 )
+
 target_link_libraries(inout PUBLIC
   util
   solver

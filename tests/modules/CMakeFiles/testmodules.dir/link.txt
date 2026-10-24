@@ -1,2 +1,0 @@
-/usr/bin/ar qc libtestmodules.a CMakeFiles/testmodules.dir/mod_test_lap.f90.o
-/usr/bin/ranlib libtestmodules.a

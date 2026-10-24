@@ -1,6 +1,6 @@
 module mod_test_lap
     use :: typedef, only:wp
-    use :: initial_conditions, only:real_functor, compl_functor
+    use :: functor, only:real_functor, compl_functor
     implicit none
     !width and wavevector small enough that O(h^2) FD error stays under tol
     real(wp), parameter :: alpha = 1.0e-4_wp
