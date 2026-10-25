@@ -1,14 +1,14 @@
 !rename this to input.nml and place in the input/output folder
+&grid_params
+    N = 50, 50, 30,
+    box_size = 5., 5., 5.,
+    !bottom_left_corner = [0., 0., 0.],
+/
 &system_params
-    n_part = 8000,
+    n_part = 15000,
     load_sys = .false.,
     load_fname = "",
     psi0_type = "double_gaussian",
-/
-&grid_params
-    N = 50, 50, 30,
-    box_size = 10., 10., 10.,
-    !bottom_left_corner = [0., 0., 0.],
 /
 &solver_params
     Euler_imag_dt = 1.25e10,
@@ -17,13 +17,15 @@
 &H_params
     V_ext_type = "double_well"
 /
+
+
 &double_gaussian_parameters
-    d = 2.5,
     sigma = 1. , 1. , 1.,
-    r01 = -3.2, 0., 0.,
-    r02 =  3.2, 0., 0.,
+    r01 = -1.5, 0., 0.,
+    r02 =  1.5, 0., 0.,
 /
+
 &double_well_parameters
-    d = 2.5,
+    d = 1.5,
 /
 
