@@ -7,6 +7,7 @@ target_sources(util PRIVATE
   functor/functor.f90
   functor/double_gaussian.f90
   functor/double_well.f90
+  functor/from_file.f90
 )
 
 set_target_properties(util PROPERTIES

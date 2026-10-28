@@ -8,6 +8,7 @@ module initializer
     use :: functor, only:real_functor, compl_functor
     use :: double_gaussian_mod, only:double_gaussian
     use :: double_well_mod, only:double_well
+    use :: from_file_mod, only:from_file
     implicit none
 
 contains
@@ -64,7 +65,9 @@ contains
             close (iout)
 
             if (load_sys) then
-                !TODO: actually implement the load from file
+                psi0 = get_compl_functor("preloaded")
+                call psi0%read_params(trim(fname))
+                call sys%init(gr, psi0, n_part)
             else
                 psi0 = get_compl_functor(trim(psi0_type))
                 call psi0%read_params(trim(fname))
@@ -119,6 +122,8 @@ contains
 
         if (trim(funname) == "double_gaussian") then
             allocate (double_gaussian :: func)
+        else if (trim(funname) == "preloaded") then
+            allocate (from_file :: func)
         end if
     end function get_compl_functor
 end module initializer
