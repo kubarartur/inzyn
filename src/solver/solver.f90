@@ -110,26 +110,11 @@ contains
             !! if true then don't recalculate the H%Vdd and H%n
             !! inside of H%apply
 
-        type(system) :: sys_cp
-        integer :: i, j, k
-        real(wp) :: dV
-        dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
-
-        call sys_cp%copy(sys)
-
         if (present(no_recalc)) then
-            call H%apply(gr, sys_cp, no_recalc=no_recalc)
+            res= H%find_E(gr, sys, no_recalc=no_recalc)
         else
-            call H%apply(gr, sys_cp)
+            res= H%find_E(gr, sys)
         end if
-        res = (0._wp, 0._wp)
-        do k = 1, size(sys%psi, 3)
-        do j = 1, size(sys%psi, 2)
-        do i = 1, size(sys%psi, 1)
-            res = res + dV*conjg(sys%psi(i, j, k))*sys_cp%psi(i, j, k)
-        end do
-        end do
-        end do
     end subroutine find_E_solver
 
 end module solver_mod

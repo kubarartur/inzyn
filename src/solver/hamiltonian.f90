@@ -28,6 +28,7 @@ module hamiltonian
     contains
         procedure, public :: init => init_HGPe
         procedure, public :: apply => apply_HGPe
+        procedure, public :: find_E => energy_HGPe
     end type
 
     !TODO: public only for testing purposes. Possible to to change?
@@ -100,6 +101,46 @@ contains
         sys%psi(:, :, 1) = 0
         sys%psi(:, :, size(sys%psi, 3)) = 0
     end subroutine apply_HGPe
+
+    function energy_HGPe(H, gr, sys, no_recalc) result(E)
+        class(H_GPe), intent(inout) :: H
+        type(grid_params), intent(in) :: gr
+        type(system), intent(in) :: sys
+        logical, optional, intent(in) :: no_recalc
+        complex(wp) :: E
+
+        type(system) :: sys_copy
+        real(wp) :: dV
+
+        !Refresh the stored density
+        !additional saety check. Fail if the dimension were to not agree
+        !instead of silent reallocation on assgnment
+        if (present(no_recalc)) then
+            if (.not. no_recalc) then
+                H%n(:, :, :) = abs(sys%psi)**2
+                call V_dd(H, gr)
+            end if
+        else
+            H%n(:, :, :) = abs(sys%psi)**2
+            call V_dd(H, gr)
+        end if
+
+        call sys_copy%copy(sys)
+        call laplaceian(gr, sys%psi, sys_copy%psi)
+
+        dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
+
+        !kinetic part
+        E = -0.5_wp/m*dV*sum(conjg(sys%psi)*sys_copy%psi)
+
+        !external potential part
+        E = E + dV*sum(H%n*H%V_ext)
+
+        !interaction energy
+        E = E + dV*0.5_wp*gcont*sum(H%n**2)
+        E = E + dV*0.4_wp*gLHY*sum(H%n**(2.5_wp))
+        E = E + dV*0.5*sum(H%vdd*H%n)
+    end function energy_HGPe
 
     subroutine V_dd(H, gr)
         !!compute the dipole diple term of the
