@@ -237,7 +237,7 @@ contains
                 a(i, j, k) = (1 - omega)*a(i, j, k) + omega*multip*( &
                              (a(i - 1, j, k) + a(i + 1, j, k))/dr2(1) + &
                              (a(i, j - 1, k) + a(i, j + 1, k))/dr2(2) + &
-                             (a(i, j, k - 1) + a(i, j, k + 1))/dr2(3) - &
+                             (a(i, j, k - 1) + a(i, j, k + 1))/dr2(3) + &
                              rhs(i, j, k))
             end do
             end do
