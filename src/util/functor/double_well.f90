@@ -56,7 +56,9 @@ contains
         close (io)
 
         self%d = d*m_to_a*1e-6
-        self%alpha = self%alpha*d_temp/self%d
+        self%alpha = self%alpha*(d_temp/self%d)**2
         !self beta does not change upon different d
+
+        write(*,*) "Ex is: ", w(1)
     end subroutine read_dwell_params
 end module double_well_mod
