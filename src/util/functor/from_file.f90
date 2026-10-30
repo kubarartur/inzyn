@@ -24,7 +24,7 @@ contains
 
         integer :: indx(3)
 
-        indx = int((r - self%blc)/self%dr)
+        indx = int((r - self%blc)/self%dr) + 1
         val = self%values(indx(1), indx(2), indx(3))
 
     end subroutine eval_from_file

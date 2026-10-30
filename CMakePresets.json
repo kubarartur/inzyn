@@ -41,6 +41,17 @@
           "BUILD_TESTING": "OFF",
           "CMAKE_Fortran_COMPILER": "ifort"
       }
+    },
+    {
+      "name": "ifx",
+      "displayName": "default Preset",
+      "description": "some default preset blah",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Release",
+          "BUILD_TESTING": "OFF",
+          "CMAKE_Fortran_COMPILER": "ifx"
+      }
     }
   ]
 }

@@ -21,7 +21,7 @@ add_compile_options(
 "$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-O0;-g;-Wall;-Wextra;-fcheck=all;-fbacktrace;-ffpe-trap=invalid,zero,overflow>"
 "$<$<AND:$<Fortran_COMPILER_ID:GNU>,$<CONFIG:Release>>:-O3>"
 
-#ifort
+#ifort/ifx
 "$<$<AND:$<Fortran_COMPILER_ID:Intel,IntelLLVM>,$<CONFIG:Release>>:-parallel>"
 )
 
