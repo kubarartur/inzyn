@@ -7,6 +7,7 @@ import util.plt_grid as gplt
 
 
 nm_to_atm = 1/0.0529177
+hartree_to_nK = 1.0/3.1668115631*1.0e15
 
 fig, ax = plt.subplots(1, 2)
 ax = ax.ravel()
@@ -41,11 +42,11 @@ _, _, back, forth = grid_V.getExtent((0, 2))
 n = grid_V.vals.shape
 print(n)
 ax[1].plot(np.linspace(left, right, n[0])/nm_to_atm,
-           grid_V.vals[:, n[1]//2, n[2]//2])
+           grid_V.vals[:, n[1]//2, n[2]//2]*hartree_to_nK)
 ax[1].plot(np.linspace(top, bottom, n[1])/nm_to_atm,
-           grid_V.vals[n[0]//2, :, n[2]//2])
+           grid_V.vals[n[0]//2, :, n[2]//2]*hartree_to_nK)
 ax[1].plot(np.linspace(top, bottom, n[2])/nm_to_atm,
-           grid_V.vals[n[0]//2, n[1]//2, :])
+           grid_V.vals[n[0]//2, n[1]//2, :]*hartree_to_nK)
 plt.title("External potential")
 plt.show()
 
@@ -53,14 +54,17 @@ print("Reading: " + str(proj_root/dirname/"E_of_n.txt"))
 E_of_psi, extent = prs.readTxt1D(proj_root/dirname/"E_of_n.txt")
 extent = [int(x) for x in extent]
 
+n_part = prs.extract_n_part(proj_root/dirname/"input.nml")
+print(f"read n_part to be: {n_part}")
+
 skip_first = 0
 fig, ax = plt.subplots()
 ax.plot(
     np.arange(extent[1] + 1)[skip_first:],
-    np.real(E_of_psi)[skip_first:],
+    np.real(E_of_psi)[skip_first:]*hartree_to_nK/n_part,
 )
 ax.set(
     xlabel="n",
-    ylabel="E in atomic units"
+    ylabel="E [nK]"
 )
 plt.show()

@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt
-from pathlib import Path
+import re
 
 
 class Grid:
@@ -66,6 +66,10 @@ def readTxt(fname: 'str') -> tuple[Grid]:
         values = np.loadtxt(fname, skiprows=8,
                             dtype=np.complex128, converters=s_to_compl128)
 
+    print(f"initial shape of values is: {values.shape}")
+    if len(values.shape) > 1:
+        values = values.reshape(-1)
+    print(f"after flatten shape of values is: {values.shape}")
     values = values.reshape(dims, order='F')
 
     # TODO: make this parse description from the text dump from fortran
@@ -73,7 +77,7 @@ def readTxt(fname: 'str') -> tuple[Grid]:
     return grid
 
 
-def readTxt1D(fname: src):
+def readTxt1D(fname: str):
     extent = np.loadtxt(fname, skiprows=2, max_rows=1, dtype=np.float64)
     dims = np.loadtxt(fname, skiprows=4, max_rows=1, dtype=np.int32)
     with open(fname) as f:
@@ -132,3 +136,15 @@ def plot_real(blc, step, vals, linestyle="-"):
     plt.legend(["x", "y", "z"])
 
     return fig, ax
+
+
+def extract_n_part(file_path):
+    pattern = re.compile(r"n_part\s*=\s*(\d+)")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            match = pattern.search(line)
+            if match:
+                return int(match.group(1))
+
+    return None
