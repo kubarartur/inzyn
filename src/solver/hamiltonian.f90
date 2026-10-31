@@ -213,7 +213,8 @@ contains
         real(wp) :: dr2(3)
 
         !TODO: make this smarter. Possibly some convergence-checking criterion
-        integer :: N_step = 1000
+        integer :: N_step = 300
+        integer :: N_step2 = 10
 
         !TODO: make this more portable
         real(wp), parameter :: omega = 1.9_wp
@@ -230,15 +231,17 @@ contains
             call step(arr)
         end do
 
-        !determine the final action functional value
+
         call calc_action(arr, final_S(1))
-        do iter = 1, N_step
+        do iter = 1, N_step2
             call step(arr)
         end do
         call calc_action(arr, final_S(2))
 
-        if (abs(final_S(1) - final_S(2)) > 1e-8) then
+        if (abs((final_S(1) - final_S(2))/initial_S ) > 1e-12) then
             write (stderr, *) "The relaxation criterion was not met"
+            write (stderr, *) "initial S: ", initial_S
+            write (stderr, *) "final S diff: ", abs(final_S(1) - final_S(2))
             !stop 1
         end if
     contains
