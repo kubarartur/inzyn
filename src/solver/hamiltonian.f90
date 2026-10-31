@@ -153,7 +153,6 @@ contains
 
         allocate (phi, source=H%n)
 
-
         !find the boundary condition for the laplace's equation
         call vdd_boundary(phi, gr, H%n)
         !modification in place of phi. Sol to \Nabla^2 phi = H%n
@@ -169,6 +168,22 @@ contains
         end do
         end do
         end do
+
+        block
+            integer :: endz
+            endz = size(phi, 3)
+
+            do j = 1, size(phi, 2)
+            do i = 1, size(phi, 1)
+                !different formulas at the boundary
+                H%vdd(i, j, 1) = (2._wp*phi(i, j, 1) - 5._wp*phi(i, j, 2) + &
+                                  4._wp*phi(i, j, 3) - phi(i, j, 4))/gr%dr(3)**2
+
+                H%vdd(i, j, endz) = (2._wp*phi(i, j, endz) - 5._wp*phi(i, j, endz - 1) + &
+                                     4._wp*phi(i, j, endz - 2) - phi(i, j, endz - 3))/gr%dr(3)**2
+            end do
+            end do
+        end block
 
         !add the term with Kroneker's delta
         H%vdd = H%vdd + one_third*H%n
