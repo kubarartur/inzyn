@@ -11,6 +11,7 @@ module phys_const
     real(wp), parameter :: conv_Hz_to_atm =  2.418884326584e-17_wp
     real(wp), parameter, public :: conv_m_to_a0 = 1._wp/5.29177210544e-11_wp
     real(wp), parameter, public :: conv_mev_to_atm = 1._wp/27211.4_wp
+    real(wp), parameter, public :: conv_nK_to_hartree = 3.1668115631e-15_wp
 
     !parameter declaration
     real(wp), parameter :: add = 131 !In a_0 units
