@@ -13,7 +13,7 @@ module phys_const
     real(wp), parameter, public :: conv_mev_to_atm = 1._wp/27211.4_wp
 
     !parameter declaration
-    real(wp), parameter :: add = 130 !In a_0 units
+    real(wp), parameter :: add = 131 !In a_0 units
 
     real(wp), parameter, public :: const_m = 163.929_wp*u_to_me
     real(wp), parameter, public :: const_pi = 3.141592653589793_wp
