@@ -9,7 +9,7 @@ import util.plt_grid as gplt
 nm_to_atm = 1/0.0529177
 hartree_to_nK = 1.0/3.1668115631*1.0e15
 
-fig, ax = plt.subplots(1, 2)
+fig, ax = plt.subplots(2, 2)
 ax = ax.ravel()
 
 proj_root = Path(__file__).parents[2]
@@ -27,10 +27,41 @@ print("Reading: " + str(proj_root/dirname/"psi_final.txt"))
 grid_final = prs.readTxt(
     proj_root/dirname/"psi_final.txt")
 
-gplt.plotN2(grid_init, ax[0])
+rho_max_init, max_height_init, npart_init = gplt.plotN2(
+    grid_init, ax[0], dims=(0, 1))
+
 ax[0].set_title("Initial conditions")
-gplt.plotN2(grid_final, ax[1])
-ax[1].set_title("Result of minimal energy seek")
+ax[0].set_xlabel("x")
+ax[0].set_ylabel("y")
+
+gplt.plotN2(grid_init, ax[1], dims=(0, 2))
+ax[1].set_title("Initial conditions")
+ax[1].set_xlabel("y")
+ax[1].set_ylabel("z")
+
+rho_max_final, max_height_final, npart_final = gplt.plotN2(
+    grid_final, ax[2], dims=(0, 1))
+
+ax[2].set_title("result")
+ax[2].set_xlabel("x")
+ax[2].set_ylabel("y")
+
+gplt.plotN2(grid_final, ax[3], dims=(0, 2))
+ax[3].set_title("result")
+ax[3].set_xlabel("y")
+ax[3].set_ylabel("z")
+fig.suptitle(f"rho max: {rho_max_init} --> {rho_max_final} \n" +
+             f"npart: {npart_init} --> {npart_final} \n"
+             f"Hz: {max_height_init} --> {max_height_final}")
+plt.show()
+
+fig, ax = plt.subplots(1, 2)
+ax = ax.ravel()
+
+gplt.plot_cross(grid_init, ax[0])
+gplt.plot_cross(grid_final, ax[1])
+ax[0].set_title("initial cross section")
+ax[1].set_title("final cross section")
 plt.show()
 
 fig, ax = plt.subplots(1, 2)
@@ -40,7 +71,6 @@ left, right, top, bottom = grid_V.getExtent((0, 1))
 _, _, back, forth = grid_V.getExtent((0, 2))
 
 n = grid_V.vals.shape
-print(n)
 ax[1].plot(np.linspace(left, right, n[0])/nm_to_atm,
            grid_V.vals[:, n[1]//2, n[2]//2]*hartree_to_nK)
 ax[1].plot(np.linspace(top, bottom, n[1])/nm_to_atm,
@@ -53,6 +83,7 @@ plt.show()
 print("Reading: " + str(proj_root/dirname/"E_of_n.txt"))
 E_of_psi, extent = prs.readTxt1D(proj_root/dirname/"E_of_n.txt")
 extent = [int(x) for x in extent]
+
 
 n_part = prs.extract_n_part(proj_root/dirname/"input.nml")
 print(f"read n_part to be: {n_part}")

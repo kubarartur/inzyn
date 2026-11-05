@@ -80,6 +80,9 @@ def readTxt(fname: 'str') -> tuple[Grid]:
 def readTxt1D(fname: str):
     extent = np.loadtxt(fname, skiprows=2, max_rows=1, dtype=np.float64)
     dims = np.loadtxt(fname, skiprows=4, max_rows=1, dtype=np.int32)
+
+    print(f"reading {fname}, the extent is: {extent}")
+
     with open(fname) as f:
         stri = f.readline()
         stri = stri.split(":")
