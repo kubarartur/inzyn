@@ -20,6 +20,7 @@ module solver_mod
         !! total number of steps to be done
 
     contains
+
         procedure :: init => init_solver
         procedure :: step_imag => imag_step_solver
         procedure, nopass :: find_E => find_E_solver
@@ -37,15 +38,17 @@ contains
         sol%steps_todo = std
     end subroutine init_solver
 
-    subroutine imag_step_solver(sol, gr, sys, H, no_recalc, norm_first)
+    subroutine imag_step_solver(sol, gr, sys, H, no_recalc, norm_first, delta_n)
         class(solver), intent(inout) :: sol
         type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
         type(H_GPe), intent(inout) :: H
         logical, optional, intent(in) :: no_recalc
-        logical, optional, intent(in) :: norm_first
         !! if true then don't recalculate the H%Vdd and H%n
         !! inside of H%apply
+        logical, optional, intent(in) :: norm_first
+        real(wp), optional, intent(out) :: delta_n
+        !! if present track the maximum change of density
 
         complex(wp), allocatable :: psi_cp(:, :, :)
         real(wp) :: norm_curr
@@ -79,6 +82,12 @@ contains
         call find_norm(sys%psi, gr%dr, norm_curr)
 
         sys%psi = sqrt(sys%nczr)*sys%psi/norm_curr
+
+        !after the step has been completed check how much the density
+        !have changed in the cell it's changed the most
+        if (present(delta_n)) then
+            delta_n = maxval(abs(sys%psi)**2 - abs(psi_cp)**2)
+        end if
     contains
         subroutine find_norm(arr, dr, norm)
             complex(wp), intent(in) :: arr(:, :, :)
@@ -111,9 +120,9 @@ contains
             !! inside of H%apply
 
         if (present(no_recalc)) then
-            res= H%find_E(gr, sys, no_recalc=no_recalc)
+            res = H%find_E(gr, sys, no_recalc=no_recalc)
         else
-            res= H%find_E(gr, sys)
+            res = H%find_E(gr, sys)
         end if
     end subroutine find_E_solver
 
