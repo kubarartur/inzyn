@@ -84,7 +84,6 @@ print("Reading: " + str(proj_root/dirname/"E_of_n.txt"))
 E_of_psi, extent = prs.readTxt1D(proj_root/dirname/"E_of_n.txt")
 extent = [int(x) for x in extent]
 
-
 n_part = prs.extract_n_part(proj_root/dirname/"input.nml")
 print(f"read n_part to be: {n_part}")
 
@@ -99,3 +98,23 @@ ax.set(
     ylabel="E [nK]"
 )
 plt.show()
+
+print("Reading: " + str(proj_root/dirname/"delta_n_of_n.txt"))
+try:
+    delta_n, extent = prs.readTxt1D(proj_root/dirname/"delta_n_of_n.txt")
+    extent = [int(x) for x in extent]
+    delta_n = delta_n*1e9*nm_to_atm**3
+
+    skip_first = 0
+    fig, ax = plt.subplots()
+    ax.plot(
+        np.arange(extent[1])[skip_first:],
+        delta_n[skip_first:],
+    )
+    ax.set(
+        xlabel="step number",
+        ylabel=r"max($\Delta n$) $[\frac{1}{\mu m^3}]$"
+    )
+    plt.show()
+except FileNotFoundError:
+    print("Did not find the file containing density changes. Aborting")
