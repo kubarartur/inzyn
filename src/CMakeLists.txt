@@ -2,11 +2,11 @@ add_subdirectory(util)
 add_subdirectory(solver)
 add_subdirectory(inout)
 
-add_executable(main)
-target_sources(main PRIVATE
-  main.f90)
+add_executable(ground_seek)
+target_sources(ground_seek PRIVATE
+  ground_seek.f90)
 
-target_link_libraries(main PRIVATE
+target_link_libraries(ground_seek PRIVATE
   util
   solver
   inout

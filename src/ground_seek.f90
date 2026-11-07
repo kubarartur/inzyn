@@ -1,4 +1,4 @@
-program main
+program ground_seek
     use :: typedef, only:wp
     use :: grid_util, only:grid_params, norm
     use :: system_util, only:system
@@ -56,4 +56,4 @@ program main
     !"Maximum change of the density in a single cell"
     call write_arr(out_dir_name//"delta_n_of_n", dns)
 contains
-end program main
+end program ground_seek

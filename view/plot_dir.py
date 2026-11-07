@@ -2,6 +2,8 @@ import src.read_util as prs
 import src.plot_util as mplt
 import src.unit_conv as conv
 
+import f90nml
+
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
@@ -72,14 +74,19 @@ E = np.load(fname)*conv.hartree_to_nK
 
 fname = proj_root / dirname / "delta_n_of_n.npy"
 ns = np.load(fname)*conv.dens2mum
+
+fname = proj_root / dirname / "input.nml"
+n_part = f90nml.read(fname)["system_params"]["n_part"]
+print(f"n_part is: {n_part}")
+
 n1 = np.arange(E.shape[0])
 n2 = np.arange(ns.shape[0])
 fig, ax = plt.subplots(1, 2)
 ax = ax.ravel()
-ax[0].plot(n1, np.real(E))
+ax[0].plot(n1, np.real(E)/n_part)
 ax[1].plot(n2, ns)
 ax[0].set_xlabel("n")
 ax[1].set_xlabel("n")
-ax[0].set_ylabel("E [nk]")
+ax[0].set_ylabel("E/n_part [nk]")
 ax[1].set_ylabel(r"$\Delta n$")
 plt.show()
