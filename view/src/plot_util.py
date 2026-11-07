@@ -35,6 +35,6 @@ def plotCross(quant1D: prs.Spatial_quantity1D,
     right = quant1D.blc[0] + quant1D.dr[0]*quant1D.values.shape[0]
 
     xs = np.linspace(left, right, quant1D.values.shape[0])
-    ax.plot(xs, quant1D.values, '.')
+    ax.plot(xs, quant1D.values)
 
     return ax
