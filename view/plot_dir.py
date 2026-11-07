@@ -65,3 +65,21 @@ plot_psi(psi, "initial conditions")
 fname = proj_root / dirname / "V_ext"
 pot = prs.Spatial_quantity3D(fname)
 plotAllCrosses(pot, title="External potential")
+
+
+fname = proj_root / dirname / "E_of_n.npy"
+E = np.load(fname)*conv.hartree_to_nK
+
+fname = proj_root / dirname / "delta_n_of_n.npy"
+ns = np.load(fname)*conv.dens2mum
+n1 = np.arange(E.shape[0])
+n2 = np.arange(ns.shape[0])
+fig, ax = plt.subplots(1, 2)
+ax = ax.ravel()
+ax[0].plot(n1, np.real(E))
+ax[1].plot(n2, ns)
+ax[0].set_xlabel("n")
+ax[1].set_xlabel("n")
+ax[0].set_ylabel("E [nk]")
+ax[1].set_ylabel(r"$\Delta n$")
+plt.show()
