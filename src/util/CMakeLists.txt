@@ -4,10 +4,7 @@ target_sources(util PRIVATE
   phys_const.F90
   grid.f90
   system.f90
-  functor/functor.f90
-  functor/double_gaussian.f90
-  functor/double_well.f90
-  functor/from_file.f90
+  functor.f90
 )
 
 set_target_properties(util PROPERTIES

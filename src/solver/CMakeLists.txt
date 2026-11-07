@@ -5,7 +5,6 @@ target_sources(solver PRIVATE
   autogen_laplaceian.f90
   autogen_vdd_boundary.f90
 )
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 add_custom_command(
   OUTPUT autogen_laplaceian.f90

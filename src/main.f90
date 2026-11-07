@@ -5,7 +5,7 @@ program main
     use :: hamiltonian, only:H_GPe
     use :: solver_mod, only:solver
     use :: initializer, only:innit
-    use :: arr_iout, only:write_arr
+    use :: arr_iout, only:write_arr, write_spacial
     implicit none
 
     type(grid_params) :: gr
@@ -31,10 +31,11 @@ program main
         call innit(trim(temp)//"input.nml", gr, sys, H, sol)
     end block
 
-
     call norm(sys%psi, sys%ncz, gr%dr)
-    call write_arr(sys%psi, gr, "Initial conditions for the wavefunction", out_dir_name//"psi_init.txt")
-    call write_arr(H%V_ext, gr, "The external trap potential", out_dir_name//"V_ext.txt")
+    !"Initial conditions for the wavefunction"
+    call write_spacial(out_dir_name//"psi_init", sys%psi, gr%blc, gr%dr)
+    !"The external trap potential"
+    call write_spacial(out_dir_name//"V_ext", H%V_ext, gr%blc, gr%dr)
 
     allocate (energies(0:sol%steps_todo))
     allocate (dns(sol%steps_todo))
@@ -48,10 +49,11 @@ program main
         write (*, *) "Ediff: ", energies(i - 1) - energies(i)
     end do
 
-    call write_arr(sys%psi, gr, "Result of the ground state seek", out_dir_name//"psi_final.txt")
-    call write_arr(energies, [0._wp, 1._wp*sol%steps_todo], "Energy as function of imag time step", &
-                   out_dir_name//"E_of_n.txt")
-    call write_arr(dns, [1._wp, 1._wp*sol%steps_todo], "Maximum change of the density in a single cell", &
-                   out_dir_name//"delta_n_of_n.txt")
+    !"Result of the ground state seek
+    call write_spacial(out_dir_name//"psi_final", sys%psi, gr%blc, gr%dr)
+    !"Energy as function of imag time step"
+    call write_arr(out_dir_name//"E_of_n", energies)
+    !"Maximum change of the density in a single cell"
+    call write_arr(out_dir_name//"delta_n_of_n", dns)
 contains
 end program main

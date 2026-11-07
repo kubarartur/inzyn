@@ -3,6 +3,18 @@ cmake_minimum_required(VERSION 3.23)
 project(inzyn
   DESCRIPTION "FOO BAR"
   LANGUAGES Fortran)
+
+#for autogeneration
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+#find fypp
+find_program(fypp fypp REQUIRED)
+
+#to satisfy fortran stdlib's requirements
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+find_package(fortran_stdlib REQUIRED)
+
+#for -parallel ifortran flag
 find_package(OpenMP REQUIRED)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
