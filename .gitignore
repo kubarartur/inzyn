@@ -3,7 +3,7 @@ build/
 Makefile
 data
 view/.venv
-uv.lock
+view/uv.lock
 __pycache__
 perf.*
 input.nml
