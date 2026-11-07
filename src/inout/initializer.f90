@@ -8,6 +8,7 @@ module initializer
     use :: functor, only:real_functor, compl_functor
     use :: double_gaussian_mod, only:double_gaussian
     use :: double_well_mod, only:double_well
+    use :: single_well_mod, only:single_well
     use :: from_file_mod, only:from_file
     implicit none
 
@@ -113,6 +114,8 @@ contains
 
         if (trim(funname) == "double_well") then
             allocate (double_well :: func)
+        else if (trim(funname) == "single_well") then
+            allocate (single_well :: func)
         end if
     end function get_real_functor
 

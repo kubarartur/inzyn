@@ -11,6 +11,7 @@ target_sources(inout PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}/arr_iout.f90
   functor/double_gaussian.f90
   functor/double_well.f90
+  functor/single_well.f90
   functor/from_file.f90
 )
 
