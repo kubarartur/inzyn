@@ -37,15 +37,15 @@ program ground_seek
     !"The external trap potential"
     call write_spacial(out_dir_name//"V_ext", H%V_ext, gr%blc, gr%dr)
 
-    allocate (energies(0:sol%steps_todo))
-    allocate (dns(sol%steps_todo))
+    allocate (energies(0:sol%imag_steps_todo))
+    allocate (dns(sol%imag_steps_todo))
 
     call sol%find_E(gr, sys, H, energies(0))
 
-    do i = 1, sol%steps_todo
+    do i = 1, sol%imag_steps_todo
         call sol%step_imag(gr, sys, H, no_recalc=.true., delta_n=dns(i))
         call sol%find_E(gr, sys, H, energies(i))
-        write (*, *) "Step: ", i, "/", sol%steps_todo
+        write (*, *) "Step: ", i, "/", sol%imag_steps_todo
         write (*, *) "Ediff: ", energies(i - 1) - energies(i)
     end do
 

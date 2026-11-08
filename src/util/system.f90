@@ -53,6 +53,8 @@ contains
         ! at the time of writing had no better idea
 
        allocate(sys%psi, source=sys2%psi)
-        sys%psi(:,:,:) = sys2%psi
+       sys%psi(:,:,:) = sys2%psi
+       sys%ncz = sys2%ncz
+       sys%nczr = sys2%nczr
     end subroutine copy_system
 end module

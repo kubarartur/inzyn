@@ -79,15 +79,18 @@ contains
         subroutine init_solver()
             integer :: iout
             real(wp) :: Euler_imag_dt = 1e8
-            integer :: steps_todo = 3
-            namelist /solver_params/ Euler_imag_dt, steps_todo
+            integer :: imag_steps_todo = 3
+            real(wp) :: CN_real_dt = 1e8
+            integer :: real_steps_todo = 3
+            integer :: log_real_every = 100
+            namelist /solver_params/ Euler_imag_dt, imag_steps_todo, CN_real_dt, real_steps_todo, log_real_every
 
             iout = 67
             open (iout, file=trim(fname), status="old", action="read")
             read (iout, nml=solver_params)
             close (iout)
 
-            call sol%init(Euler_imag_dt, steps_todo)
+            call sol%init(Euler_imag_dt, imag_steps_todo, CN_real_dt, real_steps_todo, log_real_every)
         end subroutine init_solver
 
         subroutine init_H()

@@ -2,23 +2,26 @@
 &grid_params
     N = 70, 70, 30,
     box_size = 15., 15., 19.,
-    !bottom_left_corner = [0., 0., 0.],
+    !bottom_left_corner = [0., 0., 0.], commenting this out makes the grid centered
 /
 &system_params
     n_part = 15000,
-    load_sys = .false.,
-    load_fname = "",
-    psi0_type = "double_gaussian",
+    load_sys = .false., 
+    load_fname = "", !only if fload sys
+    psi0_type = "double_gaussian", !only if not load sys
 /
 &solver_params
-    Euler_imag_dt = 1.25e11,
-    steps_todo = 3,
+    Euler_imag_dt = 1.25e11, !for ground seek
+    imag_steps_todo = 3, !for ground seek
+    CN_real_dt = 1.25e9, !for real time evol
+    real_steps_todo = 3, !for real time evol
+    log_real_every = 100, !for real time evol
 /
 &H_params
-    V_ext_type = "double_well"
+    V_ext_type = "double_well" 
 /
 
-
+!only the used functors need to be specified here
 &double_gaussian_parameters
     sigma = 0.5 , 0.5 , 1.5,
     r01 = -1.5, 0., 0.,
