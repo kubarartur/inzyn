@@ -25,7 +25,7 @@ contains
 
         integer :: indx(3)
 
-        indx = int((r - self%blc)/self%dr) + 1
+        indx = int((r - self%blc)/self%dr + 0.5_wp)
 
         !TODO: add index out of bounds checking
         val = self%values(indx(1), indx(2), indx(3))
