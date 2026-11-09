@@ -2,7 +2,7 @@ module from_file_mod
     use :: typedef, only:wp
     use :: functor, only:compl_functor
     use :: phys_const, only:m_to_a => conv_m_to_a0
-    use :: stdlib_io_npy, only:load_npy
+    use :: arr_iout, only:load_arr
     use, intrinsic :: iso_fortran_env, only: error_unit
     implicit none
 
@@ -58,7 +58,7 @@ contains
             stop 1
         end if
 
-        open (io, file=trim(load_fname)//".nml", status="old", action="read")
+        open (io, file=trim(load_fname)//"_spatial.nml", status="old", action="read")
         read (io, nml=spacial_params)
         close (io)
 
@@ -69,7 +69,7 @@ contains
         self%blc = bottom_left_corner
         self%dr = cell_size
 
-        call load_npy(trim(load_fname)//".npy", self%values)
+        call load_arr(trim(load_fname), self%values)
     end subroutine read_from_file
 
 end module from_file_mod

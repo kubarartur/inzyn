@@ -1,6 +1,7 @@
 import src.read_util as prs
 import src.plot_util as mplt
 import src.unit_conv as conv
+import src.custom_load as cl
 
 import f90nml
 
@@ -69,11 +70,11 @@ pot = prs.Spatial_quantity3D(fname)
 plotAllCrosses(pot, title="External potential")
 
 
-fname = proj_root / dirname / "E_of_n.npy"
-E = np.load(fname)*conv.hartree_to_nK
+fname = proj_root / dirname / "E_of_n"
+E = cl.customLoad(fname)*conv.hartree_to_nK
 
-fname = proj_root / dirname / "delta_n_of_n.npy"
-ns = np.load(fname)*conv.dens2mum
+fname = proj_root / dirname / "delta_n_of_n"
+ns = cl.customLoad(fname)*conv.dens2mum
 
 fname = proj_root / dirname / "input.nml"
 n_part = f90nml.read(fname)["system_params"]["n_part"]
