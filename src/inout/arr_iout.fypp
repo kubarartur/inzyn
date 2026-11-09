@@ -1,12 +1,12 @@
 module arr_iout
     use :: typedef, only:wp
     use :: grid_util, only:grid_params
-    use :: stdlib_io_npy, only:save_npy, load_npy
 
     implicit none
     private
 
     public :: write_arr
+    public :: load_arr
     public :: write_spacial
      
     interface write_arr
@@ -26,20 +26,91 @@ module arr_iout
         module procedure ${PROCNAME}$
     #:endfor
     end interface write_spacial
+
+    interface load_arr
+        #:for RANK in [1,2,3]
+            #:for TYPE in ['real(wp)', 'complex(wp)']
+                #:set TYPENAME = TYPE.split("(")[0]
+                #:set PROCNAME = "load_arr_" + TYPENAME + "_" + str(RANK) + "d" 
+                module procedure ${PROCNAME}$
+            #:endfor
+        #:endfor
+    end interface load_arr
 contains
 
     #:for RANK in [1,2,3]
         #:for TYPE in ['real(wp)', 'complex(wp)']
             #:set TYPENAME = TYPE.split("(")[0]
+            #:set TYPEID =  "'" + TYPE + "'"
             #:set PROCNAME = "write_arr_" + TYPENAME + "_" + str(RANK) + "d" 
+            #:set IDLEN = len(TYPEID) - 2
 
             subroutine ${PROCNAME}$(fname, arr)
                 character(len=*), intent(in) :: fname
                 ${TYPE}$, intent(in) :: arr(${(":,"*RANK)[:-1]}$)
-                call save_npy(trim(fname)//".npy", arr)
+
+                integer :: id
+
+                integer :: shap(${RANK}$) = [${("0,"*RANK)[:-1]}$]
+                character(len=${IDLEN}$) :: dtype = ${TYPEID}$
+
+                namelist /arr_descr/ shap, dtype
+                shap = shape(arr)
+
+                id = 67
+                open(newunit=id, file=trim(fname) // ".bin", status="replace",&
+                    access="stream", form="unformatted", action="write")
+
+                    write(id) arr
+                close(id)
+                open(newunit=id, file= trim(fname) // "_descr.nml", status="replace",&
+                    action="write")
+
+                    write(id, nml=arr_descr)
+                close(id)
+
             end subroutine ${PROCNAME}$ 
         #:endfor
     #:endfor
+
+    #:for RANK in [1,2,3]
+        #:for TYPE in ['real(wp)', 'complex(wp)']
+            #:set TYPENAME = TYPE.split("(")[0]
+            #:set TYPEID =  "'" + TYPE + "'"
+            #:set PROCNAME = "load_arr_" + TYPENAME + "_" + str(RANK) + "d" 
+            #:set IDLEN = len(TYPEID)
+
+            subroutine ${PROCNAME}$(fname, arr)
+                character(len=*), intent(in) :: fname
+                ${TYPE}$, allocatable, intent(out) :: arr(${(":,"*RANK)[:-1]}$)
+
+                integer :: id
+
+                integer :: shap(${RANK}$) = [${("0,"*RANK)[:-1]}$]
+                character(len=${IDLEN}$) :: dtype
+
+                namelist /arr_descr/ shap, dtype
+
+                id = 67
+                open(newunit=id, file=trim(fname) // "_descr.nml", status="old",&
+                    action="read")
+
+                    read(id, nml=arr_descr)
+                close(id)
+    
+                #:set SHAP_LIST = [f"shap({i})" for i in range(1,RANK + 1)] 
+                allocate(arr(${",".join(SHAP_LIST)}$))
+
+                open(newunit=id, file=trim(fname) // ".bin", status="old",&
+                    access="stream", form="unformatted", action="read")
+
+                    read(id) arr
+                close(id)
+
+            end subroutine ${PROCNAME}$ 
+        #:endfor
+    #:endfor
+
 
     #:for TYPE in ['real(wp)', 'complex(wp)']
         #:set TYPENAME = TYPE.split("(")[0]
@@ -62,10 +133,10 @@ contains
             cell_size = dr
 
             io = 67
-            open(io, file=trim(fname)//".nml", action="write")
+            open(io, file= trim(fname)//"_spatial.nml", action="write")
             write(io, nml=spacial_params)
             close(io)
-            call save_npy(trim(fname)//".npy", arr)
+            call write_arr(trim(fname), arr)
         end subroutine ${PROCNAME}$ 
     #:endfor
 

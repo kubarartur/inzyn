@@ -9,11 +9,6 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 #find fypp
 find_program(fypp fypp REQUIRED)
 
-#to satisfy fortran stdlib's requirements
-find_package(BLAS REQUIRED)
-find_package(LAPACK REQUIRED)
-find_package(fortran_stdlib REQUIRED)
-
 #for -parallel ifortran flag
 find_package(OpenMP REQUIRED)
 

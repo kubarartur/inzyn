@@ -18,7 +18,6 @@ target_sources(inout PRIVATE
 target_link_libraries(inout PUBLIC
   util
   solver
-  fortran_stdlib::fortran_stdlib
 )
 
 set_target_properties(inout PROPERTIES
