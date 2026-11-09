@@ -10,7 +10,7 @@ add_custom_command(
   OUTPUT autogen_vdd_boundary.f90
   COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/vdd_intgen.py" autogen_vdd_boundary.f90
   DEPENDS vdd_intgen.py
-  COMMENT "Generating submodule with Laplaceian Calculation"
+  COMMENT "Generating submodule with boundary integral calculation"
   VERBATIM
 )
 

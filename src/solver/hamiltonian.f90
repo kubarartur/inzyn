@@ -205,6 +205,7 @@ contains
         !! Cell sizes
 
         integer :: iter
+        integer :: N_tot
         real(wp) :: initial_S
         real(wp) :: final_S(2)
 
@@ -219,6 +220,7 @@ contains
         !TODO: make this more portable
         real(wp), parameter :: omega = 1.9_wp
 
+        N_tot = size(arr, 1)*size(arr, 2)*size(arr, 3)
         multip = 0.5_wp/(1/dr(1)**2 + 1/dr(2)**2 + 1/dr(3)**2)
         dr2 = dr**2
 
@@ -226,24 +228,28 @@ contains
         !TODO: Verify that calc action indeed works correctly
         call calc_action(arr, initial_S)
 
-        !do the relaxation steps
-        do iter = 1, N_step
-            call step(arr)
+        do
+            !do the relaxation steps
+            do iter = 1, N_step
+                call step(arr)
+            end do
+
+
+            call calc_action(arr, final_S(1))
+            do iter = 1, N_step2
+                call step(arr)
+            end do
+            call calc_action(arr, final_S(2))
+
+            if (abs(final_S(1) - final_S(2))/N_tot > 1e-12) then
+                write (stderr, *) "The relaxation criterion was not met. Doing another ", N_step , " steps"
+                write (stderr, *) "initial S: ", initial_S
+                write (stderr, *) "final S diff: ", abs(final_S(1) - final_S(2))/N_tot
+            else
+                exit
+            end if
         end do
 
-
-        call calc_action(arr, final_S(1))
-        do iter = 1, N_step2
-            call step(arr)
-        end do
-        call calc_action(arr, final_S(2))
-
-        if (abs((final_S(1) - final_S(2))/initial_S ) > 1e-12) then
-            write (stderr, *) "The relaxation criterion was not met"
-            write (stderr, *) "initial S: ", initial_S
-            write (stderr, *) "final S diff: ", abs(final_S(1) - final_S(2))
-            !stop 1
-        end if
     contains
         subroutine step(a)
             real(wp), intent(inout) :: a(:, :, :)
