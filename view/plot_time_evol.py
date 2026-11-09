@@ -13,17 +13,9 @@ dirname = input("relative path from the project root: ")
 
 
 fname = proj_root / dirname / "psi_init"
-psi = prs.Spatial_quantity3D(fname)
-psi.values = np.abs(psi.values)**2
-psi.values *= conv.dens2mum
+names = {0: fname}
 
-psixy = prs.Spatial_quantity2D(psi, (0, 1))
-fig, ax = plt.subplots()
-ax = mplt.plot2D(psixy, ax=ax)
-plt.suptitle("Initial conditions")
-plt.show()
-
-for name in glob.glob(str(proj_root / dirname) + "/real_step*.nml"):
+for name in glob.glob(str(proj_root / dirname) + "/real_step*.bin"):
     # remove extension
     name = name.split(".")[-2]
 
@@ -31,7 +23,11 @@ for name in glob.glob(str(proj_root / dirname) + "/real_step*.nml"):
     num = num.split("_")[-1]
     num = int(num)
 
-    psi = prs.Spatial_quantity3D(name)
+    names[num] = name
+
+
+for num in sorted(names):
+    psi = prs.Spatial_quantity3D(names[num])
     psi.values = np.abs(psi.values)**2
     psi.values *= conv.dens2mum
     psixy = prs.Spatial_quantity2D(psi, (0, 1))
