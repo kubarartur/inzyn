@@ -43,7 +43,7 @@ contains
         sol%nsteps = 0
         sol%time = 0._wp
         sol%Euler_imag_dt = idt
-        sol%CN_real_dt = idt
+        sol%CN_real_dt = rdt
         sol%imag_steps_todo = istd
         sol%real_steps_todo = rstd
         sol%log_real_every = lre
@@ -128,7 +128,6 @@ contains
         type(H_GPe), intent(inout) :: H
 
         !set of predictors is needed to complete iteration
-        type(system) :: sys_cp
         type(system) :: sys_n
         type(system) :: sys_Hn
         type(system) :: sys_n1
