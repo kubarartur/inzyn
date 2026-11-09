@@ -47,6 +47,8 @@ contains
 
             subroutine ${PROCNAME}$(fname, arr)
                 character(len=*), intent(in) :: fname
+
+
                 ${TYPE}$, intent(in) :: arr(${(":,"*RANK)[:-1]}$)
 
                 integer :: id
@@ -64,7 +66,7 @@ contains
                     write(id) arr
                 close(id)
                 open(newunit=id, file= trim(fname) // "_descr.nml", status="replace",&
-                    action="write")
+                    action="write", delim="quote")
 
                     write(id, nml=arr_descr)
                 close(id)
@@ -93,7 +95,7 @@ contains
 
                 id = 67
                 open(newunit=id, file=trim(fname) // "_descr.nml", status="old",&
-                    action="read")
+                    action="read", delim="quote")
 
                     read(id, nml=arr_descr)
                 close(id)
@@ -133,7 +135,7 @@ contains
             cell_size = dr
 
             io = 67
-            open(io, file= trim(fname)//"_spatial.nml", action="write")
+            open(io, file= trim(fname)//"_spatial.nml", action="write", delim="quote")
             write(io, nml=spacial_params)
             close(io)
             call write_arr(trim(fname), arr)
