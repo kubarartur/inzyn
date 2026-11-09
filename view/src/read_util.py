@@ -1,17 +1,18 @@
 import numpy as np
 import f90nml
 import src.unit_conv as conv
+import src.custom_load as cl
 
 
 class Spatial_quantity3D:
 
     def __init__(self, fname):
         print(f"will read {str(fname) + '.npy'}")
-        self.values = np.load(str(fname) + '.npy')
+        self.values = cl.customLoad(fname)
         # verify if the quantity is indeed 3D
         assert (len(self.values.shape) == 3)
 
-        nml = f90nml.read(str(fname) + ".nml")["spacial_params"]
+        nml = f90nml.read(str(fname) + "_spatial.nml")["spacial_params"]
         self.blc = [x/conv.mum_to_atm for x in nml['bottom_left_corner']]
         self.dr = [x/conv.mum_to_atm for x in nml['cell_size']]
 
