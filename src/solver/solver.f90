@@ -1,6 +1,6 @@
 module solver_mod
     use :: typedef, only:wp
-    use :: grid_util, only:grid_params
+    use :: grid_util, only:grid_params, norm
     use :: system_util, only:system
     use :: hamiltonian, only:H_GPe
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
@@ -62,12 +62,10 @@ contains
         !! if present track the maximum change of density
 
         complex(wp), allocatable :: psi_cp(:, :, :)
-        real(wp) :: norm_curr
 
         if (present(norm_first)) then
             if (norm_first) then
-                call find_norm(sys%psi, gr%dr, norm_curr)
-                sys%psi = sqrt(sys%nczr)*sys%psi/norm_curr
+                call norm(sys%psi, sys%ncz, gr%dr)
             end if
         end if
         !TODO: need for such call points to possible refactor
@@ -89,36 +87,13 @@ contains
         sol%nsteps = sol%nsteps + 1
         sol%time = sol%time + sol%Euler_imag_dt
 
-        !normalize the wavefunctoin
-        call find_norm(sys%psi, gr%dr, norm_curr)
-
-        sys%psi = sqrt(sys%nczr)*sys%psi/norm_curr
+        call norm(sys%psi, sys%ncz, gr%dr)
 
         !after the step has been completed check how much the density
         !have changed in the cell it's changed the most
         if (present(delta_n)) then
             delta_n = maxval(abs(sys%psi)**2 - abs(psi_cp)**2)
         end if
-    contains
-        subroutine find_norm(arr, dr, norm)
-            complex(wp), intent(in) :: arr(:, :, :)
-            real(wp), intent(in) :: dr(3)
-            real(wp), intent(out) :: norm
-
-            integer :: ii, jj, kk
-            real(wp) :: dV
-            dV = dr(1)*dr(2)*dr(3)
-            norm = 0
-
-            do kk = 1, size(arr, 3)
-            do jj = 1, size(arr, 2)
-            do ii = 1, size(arr, 1)
-                norm = norm + dV*abs(arr(ii, jj, kk))**2
-            end do
-            end do
-            end do
-            norm = sqrt(norm)
-        end subroutine find_norm
     end subroutine imag_step_solver
 
     subroutine real_step_solver(sol, gr, sys, H)
@@ -171,8 +146,8 @@ contains
 
         function convergence_criterion(dV_, arr1, arr2, tol_) result(convergence)
             real(wp), intent(in) :: dV_
-            complex(wp), intent(in) :: arr1(:,:,:)
-            complex(wp), intent(in) :: arr2(:,:,:)
+            complex(wp), intent(in) :: arr1(:, :, :)
+            complex(wp), intent(in) :: arr2(:, :, :)
             real(wp), intent(in) :: tol_
             logical :: convergence
 
@@ -194,11 +169,11 @@ contains
                 convergence = .false.
             end if
 
-            write(*,*) "-----------------------------------------"
-            write(*,*) "CN point iter: ", ii
-            write(*,*) "diffn: ", diffn
-            write(*,*) "tol^2: ", tol**2
-            write(*,*) "-----------------------------------------"
+            write (*, *) "-----------------------------------------"
+            write (*, *) "CN point iter: ", ii
+            write (*, *) "diffn: ", diffn
+            write (*, *) "tol^2: ", tol**2
+            write (*, *) "-----------------------------------------"
 
         end function convergence_criterion
 
