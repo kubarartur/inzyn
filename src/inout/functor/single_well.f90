@@ -12,7 +12,6 @@ module single_well_mod
     type, extends(real_functor) :: single_well
         real(wp) :: d = 1.5e-6_wp*m_to_a
         real(wp) :: alpha = 0.25_wp*m*(w(1)/1.5e-6_wp/m_to_a)**2
-        real(wp) :: C = 0.25*nk_to_atm/3._wp/1e-6_wp/m_to_a
     contains
         procedure :: eval => eval_swell
         procedure :: read_params => read_swell_params
@@ -28,14 +27,11 @@ contains
 
         associate ( &
             d => self%d, &
-            alpha => self%alpha, &
-            C => self%C)
+            alpha => self%alpha)
 
             val = alpha*r(1)**4
             val = val + 0.5_wp*m*(w(2)*r(2))**2
             val = val + 0.5_wp*m*(w(3)*r(3))**2
-            val = val + C*r(1)
-
         end associate
     end subroutine eval_swell
 
@@ -58,7 +54,6 @@ contains
 
         self%d = d*m_to_a*1e-6
         self%alpha = self%alpha*(d_temp/self%d)**2
-        self%C = self%C*(d_temp/self%d)
 
         write (*, *) "Ex is: ", w(1)
     end subroutine read_swell_params

@@ -12,6 +12,8 @@ target_sources(inout PRIVATE
   functor/double_gaussian.f90
   functor/double_well.f90
   functor/single_well.f90
+  functor/double_well_shift.f90
+  functor/single_well_shift.f90
   functor/from_file.f90
 )
 

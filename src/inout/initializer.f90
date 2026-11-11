@@ -9,6 +9,8 @@ module initializer
     use :: double_gaussian_mod, only:double_gaussian
     use :: double_well_mod, only:double_well
     use :: single_well_mod, only:single_well
+    use :: double_well_shift_mod, only:double_well_shift
+    use :: single_well_shift_mod, only:single_well_shift
     use :: from_file_mod, only:from_file
     implicit none
 
@@ -119,6 +121,10 @@ contains
             allocate (double_well :: func)
         else if (trim(funname) == "single_well") then
             allocate (single_well :: func)
+        else if (trim(funname) == "single_well_shift") then
+            allocate (single_well_shift :: func)
+        else if (trim(funname) == "double_well_shift") then
+            allocate (double_well_shift :: func)
         end if
     end function get_real_functor
 

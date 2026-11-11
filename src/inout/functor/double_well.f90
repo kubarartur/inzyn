@@ -13,7 +13,6 @@ module double_well_mod
         real(wp) :: d = 1.5e-6_wp*m_to_a
         real(wp) :: alpha = 0.25_wp*m*(w(1)/1.5e-6_wp/m_to_a)**2
         real(wp) :: beta = 0.5_wp*m*w(1)**2
-        real(wp) :: C = 0.25*nk_to_atm/3._wp/1e-6_wp/m_to_a
     contains
         procedure :: eval => eval_dwell
         procedure :: read_params => read_dwell_params
@@ -30,13 +29,11 @@ contains
         associate ( &
             d => self%d, &
             alpha => self%alpha, &
-            beta => self%beta, &
-            C => self%C)
+            beta => self%beta)
 
             val = alpha*r(1)**4 - beta*r(1)**2
             val = val + 0.5_wp*m*(w(2)*r(2))**2
             val = val + 0.5_wp*m*(w(3)*r(3))**2
-            val = val + C*r(1)
 
         end associate
     end subroutine eval_dwell
@@ -60,7 +57,6 @@ contains
 
         self%d = d*m_to_a*1e-6
         self%alpha = self%alpha*(d_temp/self%d)**2
-        self%C = self%C*(d_temp/self%d)
         !self beta does not change upon different d
 
         write (*, *) "Ex is: ", w(1)

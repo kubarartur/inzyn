@@ -119,7 +119,7 @@ contains
 
         !helpers
         real(wp) :: dV, tol
-        integer :: ii, point_iter
+        integer :: ii
         integer :: max_iter
 
         dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
