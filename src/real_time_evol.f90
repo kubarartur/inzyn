@@ -48,8 +48,8 @@ program ground_seek
     halfz = size(sys%psi, 3)/2
 
     call sol%find_E(gr, sys, H, energies(0))
-    r_right(:, 0) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz))
-    r_left(:, 0) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz))
+    r_right(:, 0) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz), [halfx, 0, halfz])
+    r_left(:, 0) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz), [0, 0, halfz])
 
     do i = 1, sol%real_steps_todo
         write (*, *) "*****************************************************************************************"
@@ -58,8 +58,8 @@ program ground_seek
 
         !cheap call, gives info as solver should hold E const
         call sol%find_E(gr, sys, H, energies(i), no_recalc=.true.)
-        r_right(:, i) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz))
-        r_left(:, i) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz))
+        r_right(:, i) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz), [halfx, 0, halfz])
+        r_left(:, i) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz), [0, 0, halfz])
 
         if (modulo(i, sol%log_real_every) == 0) then
             block
@@ -77,9 +77,10 @@ program ground_seek
     call write_arr(out_dir_name//"r_left_of_n", r_left)
 contains
 
-    function r_expct(gr_, psi) result(ret)
+    function r_expct(gr_, psi, offset) result(ret)
         type(grid_params), intent(in) :: gr_
         complex(wp), intent(in) :: psi(:, :, :)
+        integer, intent(in) :: offset(3)
         real(wp) :: ret(3)
 
         integer :: ii, jj, kk
@@ -95,7 +96,7 @@ contains
         do kk = 1, size(psi, 3)
         do jj = 1, size(psi, 2)
         do ii = 1, size(psi, 1)
-            loc_r = gr_%blc + [ii, jj, kk]*gr_%dr
+            loc_r = gr_%blc + ([ii, jj, kk] + offset)*gr_%dr
             loc_n = dV*abs(psi(ii, jj, kk))**2
             loc_norm = loc_norm + loc_n
 
