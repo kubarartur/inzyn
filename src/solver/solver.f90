@@ -87,6 +87,14 @@ contains
         sol%nsteps = sol%nsteps + 1
         sol%time = sol%time + sol%Euler_imag_dt
 
+        !manual boundary conition enforcement once again
+        sys%psi(:,:,1) = 0
+        sys%psi(:,1,:) = 0
+        sys%psi(1,:,:) = 0
+        sys%psi(:,:,size(sys%psi, 3)) = 0
+        sys%psi(:,size(sys%psi, 2),:) = 0
+        sys%psi(size(sys%psi, 1),:,:) = 0
+
         call norm(sys%psi, sys%ncz, gr%dr)
 
         !after the step has been completed check how much the density
