@@ -88,12 +88,12 @@ contains
         sol%time = sol%time + sol%Euler_imag_dt
 
         !manual boundary conition enforcement once again
-        sys%psi(:,:,1) = 0
-        sys%psi(:,1,:) = 0
-        sys%psi(1,:,:) = 0
-        sys%psi(:,:,size(sys%psi, 3)) = 0
-        sys%psi(:,size(sys%psi, 2),:) = 0
-        sys%psi(size(sys%psi, 1),:,:) = 0
+        sys%psi(:, :, 1) = 0
+        sys%psi(:, 1, :) = 0
+        sys%psi(1, :, :) = 0
+        sys%psi(:, :, size(sys%psi, 3)) = 0
+        sys%psi(:, size(sys%psi, 2), :) = 0
+        sys%psi(size(sys%psi, 1), :, :) = 0
 
         call norm(sys%psi, sys%ncz, gr%dr)
 
@@ -104,11 +104,13 @@ contains
         end if
     end subroutine imag_step_solver
 
-    subroutine real_step_solver(sol, gr, sys, H)
+    subroutine real_step_solver(sol, gr, sys, H, stat, max_iter_)
         class(solver), intent(inout) :: sol
         type(grid_params), intent(in) :: gr
         type(system), intent(inout) :: sys
         type(H_GPe), intent(inout) :: H
+        integer, intent(out), optional :: stat
+        integer, intent(in), optional :: max_iter_
 
         !set of predictors is needed to complete iteration
         type(system) :: sys_n
@@ -117,10 +119,17 @@ contains
 
         !helpers
         real(wp) :: dV, tol
-        integer :: ii
+        integer :: ii, point_iter
+        integer :: max_iter
 
         dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
         tol = 1.e-8_wp
+
+        if( present(max_iter_)) then
+            max_iter = max_iter_
+        else
+            max_iter = 50
+        end if
 
         associate (dt => sol%CN_real_dt)
 
@@ -151,9 +160,17 @@ contains
                 sys%psi(size(sys%psi, 1), :, :) = 0
 
                 if (convergence_criterion(dV, sys%psi, sys_n1%psi, tol)) then
+                    if (present(stat)) stat = 0
                     exit
                 end if
+
                 ii = ii + 1
+
+                if (ii > max_iter) then
+                    write (stderr, *) "Point iteration fail, too many iterations!"
+                    if (present(stat)) stat = 1
+                    exit
+                end if
             end do
 
         end associate
@@ -190,7 +207,6 @@ contains
             write (*, *) "diffn: ", diffn
             write (*, *) "tol^2: ", tol**2
             write (*, *) "-----------------------------------------"
-
         end function convergence_criterion
 
     end subroutine real_step_solver

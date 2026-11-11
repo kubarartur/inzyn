@@ -20,6 +20,7 @@ program ground_seek
     integer :: halfx, endx, halfz
     integer :: argc
     character(len=:), allocatable :: out_dir_name
+    integer :: stat
 
     argc = command_argument_count()
     if (argc < 1 .or. argc > 1) then
@@ -54,7 +55,11 @@ program ground_seek
     do i = 1, sol%real_steps_todo
         write (*, *) "*****************************************************************************************"
         write (*, *) "real step: ", i, " / ", sol%real_steps_todo
-        call sol%step_real(gr, sys, H)
+
+        call sol%step_real(gr, sys, H, stat)
+        if (stat /= 0) then
+            stop 1
+        end if
 
         !cheap call, gives info as solver should hold E const
         call sol%find_E(gr, sys, H, energies(i), no_recalc=.true.)
