@@ -142,6 +142,14 @@ contains
                 !atomic units \hbar omitted
                 sys%psi = sys_n%psi - (0, 0.5_wp)*dt*(sys_Hn%psi + sys%psi)
 
+                call norm(sys%psi, sys%ncz, gr%dr)
+                sys%psi(:, :, 1) = 0
+                sys%psi(:, 1, :) = 0
+                sys%psi(1, :, :) = 0
+                sys%psi(:, :, size(sys%psi, 3)) = 0
+                sys%psi(:, size(sys%psi, 2), :) = 0
+                sys%psi(size(sys%psi, 1), :, :) = 0
+
                 if (convergence_criterion(dV, sys%psi, sys_n1%psi, tol)) then
                     exit
                 end if
