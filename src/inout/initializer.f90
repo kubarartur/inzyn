@@ -12,6 +12,7 @@ module initializer
     use :: double_well_shift_mod, only:double_well_shift
     use :: single_well_shift_mod, only:single_well_shift
     use :: from_file_mod, only:from_file
+    use, intrinsic :: iso_fortran_env, only:error_unit
     implicit none
 
 contains
@@ -22,6 +23,7 @@ contains
         type(system), intent(out) :: sys
         type(H_GPe), intent(out) :: H
         type(solver), intent(out) :: sol
+
 
         call init_grid()
         call init_sys()
@@ -116,6 +118,7 @@ contains
     function get_real_functor(funname) result(func)
         character(len=*), intent(in) :: funname
         class(real_functor), allocatable :: func
+
 
         if (trim(funname) == "double_well") then
             allocate (double_well :: func)
