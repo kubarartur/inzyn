@@ -58,6 +58,10 @@ program ground_seek
 
         call sol%step_real(gr, sys, H, stat)
         if (stat /= 0) then
+            call write_spacial(out_dir_name//"psi_final", sys%psi, gr%blc, gr%dr)
+            call write_arr(out_dir_name//"E_n_of_n", energies)
+            call write_arr(out_dir_name//"r_right_of_n", r_right)
+            call write_arr(out_dir_name//"r_left_of_n", r_left)
             stop 1
         end if
 
@@ -75,7 +79,6 @@ program ground_seek
         end if
     end do
 
-    !"Result of the ground state seek
     call write_spacial(out_dir_name//"psi_final", sys%psi, gr%blc, gr%dr)
     call write_arr(out_dir_name//"E_n_of_n", energies)
     call write_arr(out_dir_name//"r_right_of_n", r_right)
