@@ -1,16 +1,17 @@
 import src.read_util as prs
 import src.plot_util as mplt
 import src.unit_conv as conv
-import src.custom_load as cl
+from time import sleep
 
-import f90nml
 
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
+import sys
+import pickle
 
 proj_root = Path(__file__).parents[1]
-dirname = input("relative path from the project root: ")
+fname = sys.argv[1]
 
 
 def plot_psi(psi, title=""):
@@ -42,50 +43,67 @@ def plot_psi(psi, title=""):
     plt.show()
 
 
-def plotAllCrosses(val: prs.Spatial_quantity3D, title=""):
-    val.values = pot.values*conv.hartree_to_nK
+def plotAllCrosses(val: prs.Spatial_quantity3D, title="", ax=None,
+                   addlabel=""):
+    if ax is None:
+        fig, ax = plt.subplots()
+
     x_cross = prs.Spatial_quantity1D(val, 0)
     y_cross = prs.Spatial_quantity1D(val, 1)
     z_cross = prs.Spatial_quantity1D(val, 2)
 
-    fig, ax = plt.subplots()
-    mplt.plotCross(x_cross, ax)
-    mplt.plotCross(y_cross, ax)
-    mplt.plotCross(z_cross, ax)
-    plt.legend(["x", "y", "z"])
+    mplt.plotCross(x_cross, ax=ax, label="x " + addlabel)
+    mplt.plotCross(y_cross, ax=ax, label="y " + addlabel)
+    mplt.plotCross(z_cross, ax=ax, label="z " + addlabel)
+
+    plt.legend(["x " + addlabel, "y " + addlabel, "z " + addlabel])
     plt.suptitle(title)
-    plt.show()
 
 
-fname = proj_root / dirname / "psi_final"
-psi = prs.Spatial_quantity3D(fname)
-plot_psi(psi, "result")
+with open(fname, "rb") as f:
+    runs = pickle.load(f)
 
-fname = proj_root / dirname / "psi_init"
-psi = prs.Spatial_quantity3D(fname)
-plot_psi(psi, "initial conditions")
+psi_init = runs[0]["psi_init"]
+psi_final = runs[-1]["psi_final"]
 
-fname = proj_root / dirname / "V_ext"
-pot = prs.Spatial_quantity3D(fname)
-plotAllCrosses(pot, title="External potential")
+V_exts = [run["V_ext"] for run in runs]
 
+for V_ext in V_exts:
+    V_ext.values = V_ext.values*conv.dens2mum
 
-fname = proj_root / dirname / "E_of_n"
-E = cl.customLoad(fname)*conv.hartree_to_nK
+plot_psi(psi_final, "result")
+plot_psi(psi_init, "initial conditions")
 
-fname = proj_root / dirname / "delta_n_of_n"
-ns = cl.customLoad(fname)*conv.dens2mum
+fig, ax = plt.subplots()
+for i, V_ext in enumerate(V_exts):
+    plotAllCrosses(V_ext, title="External potential",
+                   ax=ax, addlabel=f"run {i}")
+plt.show()
 
-fname = proj_root / dirname / "input.nml"
-n_part = f90nml.read(fname)["system_params"]["n_part"]
-print(f"n_part is: {n_part}")
+Es = [run["energies"]*conv.hartree_to_nK for run in runs]
+ns = [run["delta_ns"]*conv.dens2mum for run in runs]
 
-n1 = np.arange(E.shape[0])
-n2 = np.arange(ns.shape[0])
+n_parts = [run["n_part"] for run in runs]
+
 fig, ax = plt.subplots(1, 2)
 ax = ax.ravel()
-ax[0].plot(n1, np.real(E)/n_part)
-ax[1].plot(n2, ns)
+last_n1 = 0
+last_n2 = 0
+
+for i, (E, n, n_part) in enumerate(zip(Es, ns, n_parts)):
+
+    n1 = np.arange(last_n1, last_n1 + E.shape[0])
+    n2 = np.arange(last_n2, last_n2 + n.shape[0])
+    last_n1 = n1[-1]
+    last_n2 = n2[-1]
+
+    ax[0].plot(n1, np.real(E)/n_part, label=f"run {i}")
+    ax[1].plot(n2, n, label=f"run {i}")
+
+    ax[0].axvline(x=last_n1)
+    ax[1].axvline(x=last_n1)
+    plt.legend()
+
 ax[0].set_xlabel("n")
 ax[1].set_xlabel("n")
 ax[0].set_ylabel("E/n_part [nk]")
