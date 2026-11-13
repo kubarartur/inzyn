@@ -6,5 +6,6 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "f90nml>=1.5",
+    "imageio>=2.38.1",
     "matplotlib>=3.11.2",
 ]
