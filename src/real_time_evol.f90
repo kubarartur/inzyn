@@ -13,7 +13,6 @@ program ground_seek
     type(H_GPe) :: H
     type(solver) :: sol
 
-    complex(wp), allocatable :: energies(:)
     real(wp), allocatable :: r_right(:, :)
     real(wp), allocatable :: r_left(:, :)
     integer :: i
@@ -21,6 +20,13 @@ program ground_seek
     integer :: argc
     character(len=:), allocatable :: out_dir_name
     integer :: stat
+
+    complex(wp), allocatable :: energies(:)
+    complex(wp), allocatable :: contact(:)
+    complex(wp), allocatable :: contact_ext(:)
+    complex(wp), allocatable :: ext(:)
+    complex(wp), allocatable :: kinetic(:)
+    complex(wp), allocatable :: dipole(:)
 
     argc = command_argument_count()
     if (argc < 1 .or. argc > 1) then
@@ -41,6 +47,12 @@ program ground_seek
     call write_spacial(out_dir_name//"V_ext", H%V_ext, gr%blc, gr%dr)
 
     allocate (energies(0:sol%real_steps_todo))
+    allocate (contact(0:sol%real_steps_todo))
+    allocate (contact_ext(0:sol%real_steps_todo))
+    allocate (ext(0:sol%real_steps_todo))
+    allocate (kinetic(0:sol%real_steps_todo))
+    allocate (dipole(0:sol%real_steps_todo))
+
     allocate (r_right(3, 0:sol%real_steps_todo))
     allocate (r_left(3, 0:sol%real_steps_todo))
 
@@ -48,7 +60,10 @@ program ground_seek
     halfx = size(sys%psi, 1)/2
     halfz = size(sys%psi, 3)/2
 
-    call sol%find_E(gr, sys, H, energies(0))
+    call H%find_E(gr, sys, energies(0), &
+                  contact=contact(0), contact_ext=contact_ext(0), &
+                  ext=ext(0), kinetic=kinetic(0), dipole=dipole(0))
+
     r_right(:, 0) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz), [halfx, 0, halfz])
     r_left(:, 0) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz), [0, 0, halfz])
 
@@ -65,8 +80,10 @@ program ground_seek
             stop 1
         end if
 
-        !cheap call, gives info as solver should hold E const
-        call sol%find_E(gr, sys, H, energies(i), no_recalc=.true.)
+        call H%find_E(gr, sys, energies(i), &
+                      contact=contact(i), contact_ext=contact_ext(i), &
+                      ext=ext(i), kinetic=kinetic(i), dipole=dipole(i))
+
         r_right(:, i) = r_expct(gr, sys%psi(halfx:endx, :, halfz:halfz), [halfx, 0, halfz])
         r_left(:, i) = r_expct(gr, sys%psi(1:halfx, :, halfz:halfz), [0, 0, halfz])
 
@@ -80,7 +97,14 @@ program ground_seek
     end do
 
     call write_spacial(out_dir_name//"psi_final", sys%psi, gr%blc, gr%dr)
-    call write_arr(out_dir_name//"E_n_of_n", energies)
+
+    call write_arr(out_dir_name//"E_of_n", energies)
+    call write_arr(out_dir_name//"contact_of_n", contact)
+    call write_arr(out_dir_name//"contact_ext_of_n", contact_ext)
+    call write_arr(out_dir_name//"ext_of_n", ext)
+    call write_arr(out_dir_name//"kinetic_of_n", kinetic)
+    call write_arr(out_dir_name//"dipole_of_n", dipole)
+
     call write_arr(out_dir_name//"r_right_of_n", r_right)
     call write_arr(out_dir_name//"r_left_of_n", r_left)
 contains

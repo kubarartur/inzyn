@@ -28,7 +28,6 @@ module solver_mod
         procedure :: init => init_solver
         procedure :: step_imag => imag_step_solver
         procedure :: step_real => real_step_solver
-        procedure, nopass :: find_E => find_E_solver
     end type solver
 contains
 
@@ -210,21 +209,5 @@ contains
         end function convergence_criterion
 
     end subroutine real_step_solver
-
-    subroutine find_E_solver(gr, sys, H, res, no_recalc)
-        type(grid_params), intent(in) :: gr
-        type(system), intent(in) :: sys
-        type(H_GPe), intent(inout) :: H
-        complex(wp), intent(out) :: res
-        logical, optional, intent(in) :: no_recalc
-            !! if true then don't recalculate the H%Vdd and H%n
-            !! inside of H%apply
-
-        if (present(no_recalc)) then
-            res = H%find_E(gr, sys, no_recalc=no_recalc)
-        else
-            res = H%find_E(gr, sys)
-        end if
-    end subroutine find_E_solver
 
 end module solver_mod
