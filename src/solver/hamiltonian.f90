@@ -102,12 +102,18 @@ contains
         sys%psi(:, :, size(sys%psi, 3)) = 0
     end subroutine apply_HGPe
 
-    function energy_HGPe(H, gr, sys, no_recalc) result(E)
+    subroutine energy_HGPe(H, gr, sys, E, no_recalc, &
+                           contact, contact_ext, dipole, kinetic, ext)
         class(H_GPe), intent(inout) :: H
         type(grid_params), intent(in) :: gr
         type(system), intent(in) :: sys
-        logical, optional, intent(in) :: no_recalc
-        complex(wp) :: E
+        complex(wp), intent(out) :: E
+        logical(wp), optional, intent(in) :: no_recalc
+        complex(wp), optional, intent(out) :: contact
+        complex(wp), optional, intent(out) :: contact_ext
+        complex(wp), optional, intent(out) :: dipole
+        complex(wp), optional, intent(out) :: kinetic
+        complex(wp), optional, intent(out) :: ext
 
         type(system) :: sys_copy
         real(wp) :: dV
@@ -131,16 +137,46 @@ contains
         dV = gr%dr(1)*gr%dr(2)*gr%dr(3)
 
         !kinetic part
-        E = -0.5_wp/m*dV*sum(conjg(sys%psi)*sys_copy%psi)
+        if (present(kinetic)) then
+            kinetic = -0.5_wp/m*dV*sum(conjg(sys%psi)*sys_copy%psi)
+            E = kinetic
+        else
+            E = -0.5_wp/m*dV*sum(conjg(sys%psi)*sys_copy%psi)
+        end if
 
         !external potential part
-        E = E + dV*sum(H%n*H%V_ext)
+        if (present(ext)) then
+            ext = dV*sum(H%n*H%V_ext)
+            E = E + ext
+        else
+            E = E + dV*sum(H%n*H%V_ext)
+        end if
 
-        !interaction energy
-        E = E + dV*0.5_wp*gcont*sum(H%n**2)
-        E = E + dV*0.4_wp*gLHY*sum(H%n**(2.5_wp))
-        E = E + dV*0.5*sum(H%vdd*H%n)
-    end function energy_HGPe
+        !contact potential
+        if (present(contact)) then
+            contact = dV*0.5_wp*gcont*sum(H%n**2)
+            E = E + contact
+        else
+            E = E + dV*0.5_wp*gcont*sum(H%n**2)
+        end if
+
+        !beyound mean field contact potential
+        if (present(contact_ext)) then
+            contact_ext = dV*0.4_wp*gLHY*sum(H%n**(2.5_wp))
+            E = E + contact_ext
+        else
+            E = E + dV*0.4_wp*gLHY*sum(H%n**(2.5_wp))
+        end if
+
+        !dipole dipole potential
+        if (present(dipole)) then
+            dipole = dV*0.5*sum(H%vdd*H%n)
+            E = E + dipole
+        else
+            E = E + dV*0.5*sum(H%vdd*H%n)
+        end if
+
+    end subroutine energy_HGPe
 
     subroutine V_dd(H, gr)
         !!compute the dipole diple term of the
@@ -234,7 +270,6 @@ contains
                 call step(arr)
             end do
 
-
             call calc_action(arr, final_S(1))
             do iter = 1, N_step2
                 call step(arr)
@@ -242,7 +277,7 @@ contains
             call calc_action(arr, final_S(2))
 
             if (abs(final_S(1) - final_S(2))/N_tot > 1e-12) then
-                write (stderr, *) "The relaxation criterion was not met. Doing another ", N_step , " steps"
+                write (stderr, *) "The relaxation criterion was not met. Doing another ", N_step, " steps"
                 write (stderr, *) "initial S: ", initial_S
                 write (stderr, *) "final S diff: ", abs(final_S(1) - final_S(2))/N_tot
             else
