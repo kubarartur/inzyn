@@ -1,4 +1,3 @@
-import numpy as np
 import f90nml
 import src.unit_conv as conv
 import src.custom_load as cl
@@ -7,7 +6,7 @@ import src.custom_load as cl
 class Spatial_quantity3D:
 
     def __init__(self, fname):
-        print(f"will read {str(fname) + '.npy'}")
+        print(f"will read {str(fname)}")
         self.values = cl.customLoad(fname)
         # verify if the quantity is indeed 3D
         assert (len(self.values.shape) == 3)

@@ -26,7 +26,7 @@ def plot2D(quant2D: prs.Spatial_quantity2D,
 
 
 def plotCross(quant1D: prs.Spatial_quantity1D,
-              ax=None):
+              ax=None, label=""):
 
     if ax is None:
         _, ax = plt.subplots()
@@ -35,6 +35,6 @@ def plotCross(quant1D: prs.Spatial_quantity1D,
     right = quant1D.blc[0] + quant1D.dr[0]*quant1D.values.shape[0]
 
     xs = np.linspace(left, right, quant1D.values.shape[0])
-    ax.plot(xs, quant1D.values)
+    ax.plot(xs, quant1D.values, label=label)
 
     return ax

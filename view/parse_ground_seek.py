@@ -33,6 +33,12 @@ for dirnum, dirname in enumerate(dirnames[:-1]):
                            "input.nml")["grid_params"]["box_size"]
 
     energies = cl.customLoad(proj_root / dirname / "E_of_n")
+    contact = cl.customLoad(proj_root / dirname / "contact_of_n")
+    contact_ext = cl.customLoad(proj_root / dirname / "contact_ext_of_n")
+    ext = cl.customLoad(proj_root / dirname / "ext_of_n")
+    kinetic = cl.customLoad(proj_root / dirname / "kinetic_of_n")
+    dipole = cl.customLoad(proj_root / dirname / "dipole_of_n")
+
     delta_ns = cl.customLoad(proj_root / dirname / "delta_n_of_n")
     psi_init = ru.Spatial_quantity3D(proj_root / dirname / "psi_init")
     psi_final = ru.Spatial_quantity3D(proj_root / dirname / "psi_final")
@@ -44,7 +50,14 @@ for dirnum, dirname in enumerate(dirnames[:-1]):
         "n_part": n_part,
         "grid_dims": grid_dims,
         "box_size": box_size,
-        "energies": energies,
+        "energies": {
+            "total": energies,
+            "contact": contact,
+            "contact_ext": contact,
+            "ext": ext,
+            "kinetic": kinetic,
+            "diople": dipole
+        },
         "delta_ns": delta_ns,
         "V_ext": V_ext,
         "psi_init": psi_init,
