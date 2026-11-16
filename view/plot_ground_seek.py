@@ -28,17 +28,17 @@ def plot_psi(psi, title=""):
     ax = ax.ravel()
     mplt.plot2D(xy_cross, ax=ax[0])
     mplt.plot2D(xz_cross, ax=ax[1])
-    ax[0].set_xlabel("x")
-    ax[0].set_ylabel("y")
-    ax[1].set_xlabel("x")
-    ax[1].set_ylabel("z")
+    ax[0].set_xlabel(r"x $[\mu m]$")
+    ax[0].set_ylabel(r"y $[\mu m]$")
+    ax[1].set_xlabel(r"x $[\mu m]$")
+    ax[1].set_ylabel(r"z $[\mu m]$")
     plt.suptitle(title)
     plt.show()
 
     fig, ax = plt.subplots()
     mplt.plotCross(x_cross, ax=ax)
-    ax.set_xlabel("x")
-    ax.set_ylabel("rho")
+    ax.set_xlabel(r"x $[\mu m]$")
+    ax.set_ylabel(r"rho $[1/\mu m^3]$")
     plt.suptitle(title)
     plt.show()
 
@@ -80,7 +80,7 @@ for i, V_ext in enumerate(V_exts):
                    ax=ax, addlabel=f"run {i}")
 plt.show()
 
-Es = [run["energies"]*conv.hartree_to_nK for run in runs]
+Es = [run["energies"]["total"]*conv.hartree_to_nK for run in runs]
 ns = [run["delta_ns"]*conv.dens2mum for run in runs]
 
 n_parts = [run["n_part"] for run in runs]

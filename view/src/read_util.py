@@ -99,4 +99,3 @@ class Spatial_quantity1D:
         ret += f"dr is {self.dr} \n"
 
         return ret
-

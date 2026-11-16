@@ -5,70 +5,54 @@ import src.unit_conv as conv
 import imageio.v3 as iio
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
+import sys
+import pickle
 
 from pathlib import Path
 
 
 proj_root = Path(__file__).parents[1]
-dirname = input("relative path from the project root: ")
+fname = sys.argv[1]
 
-fname = proj_root / dirname / "psi_init"
-names = {0: fname}
-
-for name in glob.glob(str(proj_root / dirname) + "/real_step*.bin"):
-    # remove extension
-    name = name.split(".")[-2]
-
-    num = name.split("/")[-1]
-    num = num.split("_")[-1]
-    num = int(num)
-
-    names[num] = name
+with open(fname, "rb") as f:
+    runs = pickle.load(f)
 
 images = []
+for run in runs:
+    for state_num in run["saved_states"]:
+        state = run["saved_states"][state_num]
 
-for num in sorted(names):
+        state.values = np.abs(state.values)**2
+        state.values *= conv.dens2mum
+        xy = prs.Spatial_quantity2D(state, (0, 1))
 
-    psi = prs.Spatial_quantity3D(names[num])
-    psi.values = np.abs(psi.values)**2
-    psi.values *= conv.dens2mum
-    obj = prs.Spatial_quantity2D(psi, (0, 1))
+        fig, ax = plt.subplots()
+        ax = mplt.plot2D(xy, ax=ax)
+        ax.plot(run["r_right"][0, state_num] - state.dr[0],
+                run["r_right"][1, state_num], 'ko')
 
-    fig, ax = plt.subplots()
+        ax.plot(run["r_left"][0, state_num],
+                run["r_left"][1, state_num], 'ko')
 
-    # 1. Call your existing function untouched
-    ax = mplt.plot2D(obj, ax=ax)
+        fig.canvas.draw()
+        images.append(np.asarray(fig.canvas.buffer_rgba()))
+        plt.close(fig)
 
-    # 2. Capture the plot into memory as an image array
-    fig.canvas.draw()
-    images.append(np.asarray(fig.canvas.buffer_rgba()))
-
-    # 3. Clean up the figure to save memory
-    plt.close(fig)
-
-# Save everything as a GIF (duration is in milliseconds per frame)
-iio.imwrite("system_evolutionxy.gif", images, duration=200, loop=0)
+iio.imwrite("system_evolutionxy.gif", images, duration=800, loop=0)
 
 images = []
-for num in sorted(names):
+for run in runs:
+    for state_num in run["saved_states"]:
+        state = run["saved_states"][state_num]
 
-    psi = prs.Spatial_quantity3D(names[num])
-    psi.values = np.abs(psi.values)**2
-    psi.values *= conv.dens2mum
-    obj = prs.Spatial_quantity2D(psi, (0, 2))
+        state.values = np.abs(state.values)**2
+        state.values *= conv.dens2mum
+        xy = prs.Spatial_quantity2D(state, (0, 2))
 
-    fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
+        ax = mplt.plot2D(xy, ax=ax)
+        fig.canvas.draw()
+        images.append(np.asarray(fig.canvas.buffer_rgba()))
+        plt.close(fig)
 
-    # 1. Call your existing function untouched
-    ax = mplt.plot2D(obj, ax=ax)
-
-    # 2. Capture the plot into memory as an image array
-    fig.canvas.draw()
-    images.append(np.asarray(fig.canvas.buffer_rgba()))
-
-    # 3. Clean up the figure to save memory
-    plt.close(fig)
-
-# Save everything as a GIF (duration is in milliseconds per frame)
 iio.imwrite("system_evolutionxz.gif", images, duration=200, loop=0)

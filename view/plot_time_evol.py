@@ -13,23 +13,38 @@ with open(fname, "rb") as f:
     runs = pickle.load(f)
 
 print(runs)
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(1, 2)
+ax = ax.ravel()
+
 n_curr = 0
 for i, run in enumerate(runs):
     r_right = run["r_right"]
     r_left = run["r_left"]
+    r_right_max = run["r_right_max"]
+    r_left_max = run["r_left_max"]
 
     n = np.arange(n_curr, n_curr + r_right.shape[1])
     times = n*run["timestep"]*conv.jat_to_ms
     n_curr += r_right.shape[1]
 
-    ax.plot(times, r_right[0, :], label=f"r_right, run: {i}")
-    ax.plot(times, r_left[0, :], label=f"r_left, run: {i}")
-    ax.axvline(x=times[-1])
+    ax[0].plot(times, r_right[0, :], label=f"r_right, run: {i}")
+    ax[0].plot(times, r_left[0, :], label=f"r_left, run: {i}")
+
+    ax[1].plot(times, r_right_max[0, :],
+               label=f"r_right_max, run: {i}", linestyle="--")
+
+    ax[1].plot(times, r_left_max[0, :],
+               label=f"r_left_max, run: {i}", linestyle="--")
+
+    ax[0].axvline(x=times[-1])
+    ax[1].axvline(x=times[-1])
+
 
 plt.legend()
-ax.set_xlabel("t [ms]")
-ax.set_ylabel(r"r [$\mu$s]")
+ax[0].set_xlabel("t [ms]")
+ax[0].set_ylabel(r"x [$\mu$m]")
+ax[1].set_xlabel("t [ms]")
+ax[1].set_ylabel(r"x [$\mu$m]")
 plt.show()
 
 fig, ax = plt.subplots()
