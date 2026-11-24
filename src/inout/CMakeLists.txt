@@ -15,6 +15,7 @@ target_sources(inout PRIVATE
   functor/double_well_shift.f90
   functor/single_well_shift.f90
   functor/from_file.f90
+  functor/zeros.f90
 )
 
 target_link_libraries(inout PUBLIC

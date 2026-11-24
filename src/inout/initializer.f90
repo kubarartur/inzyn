@@ -11,6 +11,7 @@ module initializer
     use :: single_well_mod, only:single_well
     use :: double_well_shift_mod, only:double_well_shift
     use :: single_well_shift_mod, only:single_well_shift
+    use :: zeros_mod, only:zeros
     use :: from_file_mod, only:from_file
     use, intrinsic :: iso_fortran_env, only:error_unit
     implicit none
@@ -128,6 +129,8 @@ contains
             allocate (single_well_shift :: func)
         else if (trim(funname) == "double_well_shift") then
             allocate (double_well_shift :: func)
+        else if (trim(funname) == "zeros") then
+            allocate (zeros :: func)
         end if
     end function get_real_functor
 
