@@ -185,41 +185,28 @@ contains
         type(grid_params), intent(in) :: gr
 
         real(wp), allocatable :: phi(:, :, :)
+        real(wp), allocatable :: rhs(:,:,:)
         integer :: i, j, k
 
         allocate (phi, source=H%n)
+        allocate (rhs, source=H%n)
 
         !find the boundary condition for the laplace's equation
         call vdd_boundary(phi, gr, H%n)
-        !modification in place of phi. Sol to \Nabla^2 phi = H%n
-        !with boundary conditions given by what's at the boundary of phi
-        call overrelax_lapl3D(phi, H%n, gr%dr)
 
         do k = 2, size(phi, 3) - 1
         do j = 1, size(phi, 2)
         do i = 1, size(phi, 1)
             !central difference for the second derrivative
             !along the dipole axis (z)
-            H%vdd(i, j, k) = (phi(i, j, k + 1) - 2*phi(i, j, k) + phi(i, j, k - 1))/gr%dr(3)**2
+            rhs(i, j, k) = (H%n(i, j, k + 1) - 2*H%n(i, j, k) + H%n(i, j, k - 1))/gr%dr(3)**2
         end do
         end do
         end do
 
-        block
-            integer :: endz
-            endz = size(phi, 3)
-
-            do j = 1, size(phi, 2)
-            do i = 1, size(phi, 1)
-                !different formulas at the boundary
-                H%vdd(i, j, 1) = (2._wp*phi(i, j, 1) - 5._wp*phi(i, j, 2) + &
-                                  4._wp*phi(i, j, 3) - phi(i, j, 4))/gr%dr(3)**2
-
-                H%vdd(i, j, endz) = (2._wp*phi(i, j, endz) - 5._wp*phi(i, j, endz - 1) + &
-                                     4._wp*phi(i, j, endz - 2) - phi(i, j, endz - 3))/gr%dr(3)**2
-            end do
-            end do
-        end block
+        !modification in place of phi. Sol to \Nabla^2 phi = \partial_{zz}H%n
+        !with boundary conditions given by what's at the boundary of phi
+        call overrelax_lapl3D(phi, rhs, gr%dr)
 
         !add the term with Kroneker's delta
         H%vdd = H%vdd + one_third*H%n
